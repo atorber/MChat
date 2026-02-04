@@ -17,14 +17,20 @@ flowchart TB
     admin[管理后台 admin]
     android[Android 客户端]
     sdk[Node / Python SDK]
-    openclaw[OpenClaw 渠道]
+  end
+
+  subgraph 集成
+    openclaw[OpenClaw]
+    openclaw_channel[OpenClaw 渠道]
+    openclaw --> openclaw_channel
   end
 
   broker[MQTT Broker]
   server[服务端 server]
   db[(MySQL)]
 
-  admin & android & sdk & openclaw --> broker
+  admin & android & sdk --> broker
+  openclaw_channel --> broker
   server --> broker
   server --> db
 ```
@@ -36,7 +42,8 @@ flowchart TB
 | **管理后台 admin** | Web 端，直连 Broker（WSS），用于员工/部门/群组管理与登录 |
 | **Android 客户端** | 手机端 App，配置员工连接信息后直连 Broker 聊天、查员工 |
 | **Node / Python SDK** | 脚本或服务端集成用，封装连接与 MChat 接口 |
-| **OpenClaw 渠道** | 将 MoltChat 作为 OpenClaw 的一个聊天渠道接入 |
+| **OpenClaw** | 多渠道协作平台，通过 OpenClaw 渠道插件接入 MoltChat |
+| **OpenClaw 渠道** | MoltChat 渠道插件，连接 OpenClaw 与 MQTT Broker |
 
 ## 文档与更新
 
