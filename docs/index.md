@@ -12,7 +12,7 @@
 
 ## 集成
 
-- [OpenClaw 集成技术方案](OpenClaw集成技术方案.md)：将 MChat 作为 OpenClaw 的聊天渠道（与 WhatsApp、Telegram 等并列）的完整技术方案与实现步骤。
+- [OpenClaw 集成使用说明](OpenClaw集成使用说明.md)：在 OpenClaw 中安装、配置并使用 MChat 渠道的步骤与常见问题；技术方案见仓库 `.knowledge/MChat适配OpenClaw技术方案.md`。
 
 ## 相关链接
 
