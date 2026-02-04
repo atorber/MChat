@@ -17,6 +17,7 @@
 | **admin/** | Web 管理后台：React + MQTT 直连 Broker，员工/部门/群组管理。详见 [admin/README.md](admin/README.md) |
 | **client/node/** | Node.js/TypeScript 客户端 SDK，封装连接、请求-响应、收件箱/群订阅与事件；**example/** 为同目录下示例。详见 [client/node/README.md](client/node/README.md) |
 | **client/python/** | Python 客户端 SDK（paho-mqtt），API 与 Node SDK 对齐；**example/** 为同目录下示例。详见 [client/python/README.md](client/python/README.md) |
+| **plugin/openclaw/channel/** | OpenClaw 渠道插件 **openclaw-channel-mchat**，将 MChat 作为 OpenClaw 聊天渠道。详见 [plugin/openclaw/channel/README.md](plugin/openclaw/channel/README.md) |
 | **docs/** | 《产品使用手册》、《消息交互接口与示例》 |
 | **.knowledge/** | 《产品需求方案》PRD、《技术设计方案》等 |
 
