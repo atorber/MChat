@@ -62,7 +62,7 @@ androidComponents {
         val versionName = output.versionName.orNull ?: "0"
         val buildType = variant.buildType
 
-        val outputFileName = "moltbot-${versionName}-${buildType}.apk"
+        val outputFileName = "moltchat-${versionName}-${buildType}.apk"
         output.outputFileName = outputFileName
       }
   }

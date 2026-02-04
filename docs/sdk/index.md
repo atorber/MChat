@@ -1,6 +1,6 @@
 # SDK 使用说明
 
-MoltChat 提供 **Node.js/TypeScript** 与 **Python** 客户端 SDK，封装 MQTT 连接、请求-响应、收件箱/群消息订阅与事件，便于脚本、服务端或 CLI 集成。两套 SDK 的 API 设计对齐，可按所用语言选择。
+MoltChat 提供 **Node.js/TypeScript** 与 **Python** 客户端 SDK，封装 MQTT 连接、请求-响应、收件箱/群消息订阅与事件，便于脚本、服务端或 CLI 集成。两套 SDK 的 API 设计对齐，可按所用语言选择。移动端/桌面端客户端见 [客户端](../client/index.md) 文档。
 
 **文档版本**：1.0
 
@@ -29,5 +29,6 @@ MoltChat 提供 **Node.js/TypeScript** 与 **Python** 客户端 SDK，封装 MQT
 
 ## 相关文档
 
+- [客户端](../client/index.md)：Android 等端侧应用说明
 - [消息交互接口](../api/index.md)：Topic、Payload、错误码及完整接口说明
 - [使用指南 - 员工](../guide/user.md)：管理员与员工使用说明、典型场景与常见问题

@@ -35,6 +35,9 @@ nav:
     - 管理类接口: api/management.md
     - 消息类接口: api/messaging.md
     - 状态与扩展: api/status-and-ext.md
+  - 客户端:
+    - 总览: client/index.md
+    - Android: client/android.md
   - SDK:
     - 使用说明: sdk/index.md
     - Node.js: sdk/node.md

@@ -17,6 +17,7 @@
 |------|------|
 | **server/** | 服务端：MQTT 网关、业务 Handler、MySQL、统一配置。详见 [server/README.md](server/README.md) |
 | **admin/** | Web 管理后台：React + MQTT 直连 Broker，员工/部门/群组管理。详见 [admin/README.md](admin/README.md) |
+| **client/android/** | MoltChat Android 客户端：配置员工连接信息后登录，支持聊天、员工列表与员工信息查询。详见 [client/android/README.md](client/android/README.md) |
 | **client/node/** | Node.js/TypeScript 客户端 SDK，封装连接、请求-响应、收件箱/群订阅与事件；**example/** 为同目录下示例。详见 [client/node/README.md](client/node/README.md) |
 | **client/python/** | Python 客户端 SDK（paho-mqtt），API 与 Node SDK 对齐；**example/** 为同目录下示例。详见 [client/python/README.md](client/python/README.md) |
 | **plugin/openclaw/channel/** | OpenClaw 渠道插件 **openclaw-channel-mchat**，将 MoltChat 作为 OpenClaw 聊天渠道。详见 [plugin/openclaw/channel/README.md](plugin/openclaw/channel/README.md) |

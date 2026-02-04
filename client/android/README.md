@@ -1,45 +1,34 @@
-## Clawdbot Node (Android MQTT) (internal)
+## MoltChat (Android)
 
-Android node app that connects to the gateway **only via MQTT**. Exposes **Canvas + Chat + Camera**. Requires the MQTT extension with **Gateway Bridge** enabled so the broker bridges to the gateway WebSocket.
+MoltChat 的 Android 客户端：配置员工连接信息后即可登录，支持与员工聊天、获取员工列表、查询员工信息。
 
-Notes:
-- The node keeps the connection alive via a **foreground service** (persistent notification with a Disconnect action).
-- Chat uses the shared session key **`main`** (same session across iOS/macOS/WebChat/Android).
-- Supports modern Android only (`minSdk 31`, Kotlin + Jetpack Compose).
+- **连接方式**：仅通过 MQTT 直连 Broker（Paho MQTT），无需 Gateway Bridge。
+- **功能**：设置中配置 Broker 地址、用户名、密码、员工 ID → 连接 → 聊天页选择员工进行私聊，支持消息收发与员工列表/详情。
+- **技术**：Kotlin + Jetpack Compose，`minSdk 31`。
 
-## Open in Android Studio
-- Open the folder `apps/android-mqtt`.
+## 打开项目
 
-## Build / Run
+用 Android Studio 打开本目录：`client/android`。
+
+## 构建与安装
 
 ```bash
-cd apps/android-mqtt
+cd client/android
 ./gradlew :app:assembleDebug
 ./gradlew :app:installDebug
-./gradlew :app:testDebugUnitTest
 ```
 
-`gradlew` auto-detects the Android SDK at `~/Library/Android/sdk` (macOS default) if `ANDROID_SDK_ROOT` / `ANDROID_HOME` are unset.
+未设置 `ANDROID_SDK_ROOT` / `ANDROID_HOME` 时，Gradle 会使用 macOS 默认路径 `~/Library/Android/sdk`。
 
-## Connect / Pair
+## 使用
 
-1) Start the gateway and enable the MQTT extension with **Gateway Bridge** (see `extensions/mqtt/README.md`). Ensure the bridge connects to your MQTT broker and the gateway WebSocket.
+1. 启动 MoltChat 服务端并确保 MQTT Broker 可用。
+2. 在手机端打开 **MoltChat** → **设置**，填写：
+   - **Broker 地址**：如 `tcp://broker.example.com:1883` 或 `ssl://broker.example.com:8883`
+   - **用户名** / **密码**：Broker 认证
+   - **员工 ID**：已在服务端/管理后台创建并下发的员工 ID
+3. 点击 **连接**，状态栏显示已连接后，进入 **聊天** 即可选择员工进行私聊、收发消息。
 
-2) In the Android app:
-- Open **Settings** → **Advanced** (MQTT 配置)
-- Configure **MQTT broker** (Broker URL, optional username/password/client ID), then tap **Connect**.
+## 权限
 
-3) Approve pairing (on the gateway machine):
-```bash
-clawdbot nodes pending
-clawdbot nodes approve <requestId>
-```
-
-More details: `docs/platforms/android.md`, `extensions/mqtt/README.md`.
-
-## Permissions
-
-- Foreground service notification (Android 13+): `POST_NOTIFICATIONS`
-- Camera:
-  - `CAMERA` for `camera.snap` and `camera.clip`
-  - `RECORD_AUDIO` for `camera.clip` when `includeAudio=true`
+- 通知（Android 13+）：`POST_NOTIFICATIONS`（用于连接状态等提示）

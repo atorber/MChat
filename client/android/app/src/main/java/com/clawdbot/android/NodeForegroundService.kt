@@ -85,7 +85,7 @@ class NodeForegroundService : Service() {
         "Connection",
         NotificationManager.IMPORTANCE_LOW,
       ).apply {
-        description = "Moltbot node connection status"
+        description = "MoltChat connection status"
         setShowBadge(false)
       }
     mgr.createNotificationChannel(channel)
