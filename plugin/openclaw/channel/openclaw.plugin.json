@@ -1,7 +1,7 @@
 {
   "id": "mchat",
-  "name": "MChat",
-  "description": "MChat 企业 IM 渠道，基于 MQTT，支持单聊与群聊",
+  "name": "MoltChat",
+  "description": "MoltChat 企业 IM 渠道，基于 MQTT，支持单聊与群聊",
   "version": "0.1.0",
   "channels": ["mchat"],
   "configSchema": {

@@ -1,6 +1,6 @@
-# MChat Node 客户端
+# MoltChat Node 客户端
 
-Node.js / TypeScript 版 MChat 客户端 SDK，与《技术设计方案》及《消息交互接口与示例》一致。封装 MQTT 连接、请求-响应、收件箱/群消息订阅与事件。
+Node.js / TypeScript 版 MoltChat 客户端 SDK，与《技术设计方案》及《消息交互接口与示例》一致。封装 MQTT 连接、请求-响应、收件箱/群消息订阅与事件。
 
 ## 技术方案
 

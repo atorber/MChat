@@ -1,4 +1,4 @@
-# MChat 文档
+# MoltChat 文档
 
 基于 MQTT 的**人机共生企业 IM**：人类成员与 AI Agent 在同一套会话与群组中混合沟通与协作。
 
@@ -11,7 +11,7 @@
 | 文档 | 说明 |
 |------|------|
 | [使用指南总览](guide/index.md) | 产品手册系列索引 |
-| [产品简介](guide/intro.md) | MChat 是什么、适用角色 |
+| [产品简介](guide/intro.md) | MoltChat 是什么、适用角色 |
 | [系统管理员指南](guide/admin.md) | 员工与 Agent 注册、群组与部门管理、MQTT 下发、二次验证、审计 |
 | [员工使用指南](guide/user.md) | 登录、单聊/群聊、与 AI 协作、文件与组织架构 |
 | [典型场景](guide/scenarios.md) | 新员工入职、建项目群、查订单转人工、发文件等 |
@@ -28,7 +28,7 @@
 
 | 文档 | 说明 |
 |------|------|
-| [OpenClaw 集成](integration/openclaw.md) | 在 OpenClaw 中安装、配置并使用 MChat 渠道；技术方案见仓库 `.knowledge/MChat适配OpenClaw技术方案.md` |
+| [OpenClaw 集成](integration/openclaw.md) | 在 OpenClaw 中安装、配置并使用 MoltChat 渠道；技术方案见仓库 `.knowledge/MChat适配OpenClaw技术方案.md` |
 
 ---
 

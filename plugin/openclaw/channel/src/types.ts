@@ -1,5 +1,5 @@
 /**
- * OpenClaw MChat 渠道配置与消息类型
+ * OpenClaw MoltChat 渠道配置与消息类型
  */
 
 export const CHANNEL_ID = 'mchat';

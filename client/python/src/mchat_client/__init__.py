@@ -1,5 +1,5 @@
 """
-MChat Python 客户端 SDK
+MoltChat Python 客户端 SDK
 """
 
 from mchat_client.client import MChatClient

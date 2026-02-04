@@ -1,5 +1,5 @@
 /**
- * MChat Node 客户端：MQTT 连接、请求-响应、收件箱/群订阅与事件
+ * MoltChat Node 客户端：MQTT 连接、请求-响应、收件箱/群订阅与事件
  */
 
 import mqtt, { type MqttClient } from 'mqtt';

@@ -1,5 +1,5 @@
 /**
- * MChat Node 客户端 SDK 入口
+ * MoltChat Node 客户端 SDK 入口
  */
 
 export { MChatClient } from './client';

@@ -1,10 +1,10 @@
-# MChat Node SDK 示例
+# MoltChat Node SDK 示例
 
 本目录为 **client/node** 下的 Node SDK 示例：连接 Broker、拉取组织架构与 Agent 列表、接收收件箱/群消息，可选发送一条测试单聊。
 
 ## 前置
 
-- 已部署 MChat 服务端与 MQTT Broker。
+- 已部署 MoltChat 服务端与 MQTT Broker。
 - 至少有一个员工账号（MQTT 用户名/密码），可由管理后台「员工管理」创建；或执行 `server` 下 `npm run db:seed` 后使用 `admin` 账号。
 
 ## 步骤

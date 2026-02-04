@@ -1,5 +1,5 @@
 /**
- * MChat Node 客户端类型定义
+ * MoltChat Node 客户端类型定义
  */
 
 /** 连接选项（与 employee.create 返回的 mqtt_connection 对应） */

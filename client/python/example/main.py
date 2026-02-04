@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MChat Python SDK 示例
+MoltChat Python SDK 示例
 
 使用前：
 1. 在 client/python 下安装：pip install -e .

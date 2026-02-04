@@ -1,5 +1,5 @@
 /**
- * MChat 服务端入口
+ * MoltChat 服务端入口
  * 加载统一配置、连接 MySQL、启动 MQTT 网关
  */
 

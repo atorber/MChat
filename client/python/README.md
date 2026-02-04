@@ -1,6 +1,6 @@
-# MChat Python 客户端
+# MoltChat Python 客户端
 
-Python 版 MChat 客户端 SDK，与《技术设计方案》及《消息交互接口与示例》一致。封装 MQTT 连接、请求-响应、收件箱/群消息订阅与事件。
+Python 版 MoltChat 客户端 SDK，与《技术设计方案》及《消息交互接口与示例》一致。封装 MQTT 连接、请求-响应、收件箱/群消息订阅与事件。
 
 ## 要求
 
@@ -12,7 +12,7 @@ Python 版 MChat 客户端 SDK，与《技术设计方案》及《消息交互�
 ```bash
 cd client/python
 pip install -e .
-# 或从项目外：pip install -e /path/to/MChat/client/python
+# 或从项目外：pip install -e /path/to/MoltChat/client/python
 ```
 
 ## 连接参数

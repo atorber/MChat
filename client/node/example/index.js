@@ -1,5 +1,5 @@
 /**
- * MChat Node SDK 示例
+ * MoltChat Node SDK 示例
  *
  * 使用前：
  * 1. 在 client/node 下执行 npm install && npm run build

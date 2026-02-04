@@ -1,4 +1,4 @@
-# MChat 服务端统一配置示例
+# MoltChat 服务端统一配置示例
 # 复制为 config.yaml 并填写实际值；config.yaml 勿提交版本库
 
 broker:

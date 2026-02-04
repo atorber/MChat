@@ -34,7 +34,7 @@ export default function Login() {
   return (
     <div style={{ maxWidth: 420, margin: '80px auto', padding: 24 }}>
       <div className="card">
-        <h2 style={{ marginBottom: 8 }}>MChat 管理后台</h2>
+        <h2 style={{ marginBottom: 8 }}>MoltChat 管理后台</h2>
         <p style={{ color: '#64748b', marginBottom: 24, fontSize: 13 }}>使用 MQTT 连接 Broker 并绑定员工身份</p>
         <form onSubmit={handleSubmit}>
           <div className="form-row">

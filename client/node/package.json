@@ -1,7 +1,7 @@
 {
   "name": "@atorber/mchat-client",
   "version": "0.1.0",
-  "description": "MChat Node.js/TypeScript 客户端 SDK",
+  "description": "MoltChat Node.js/TypeScript 客户端 SDK",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [

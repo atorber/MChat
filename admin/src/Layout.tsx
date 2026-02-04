@@ -13,7 +13,7 @@ export default function Layout() {
   return (
     <div className="app">
       <aside className="sidebar">
-        <h1>MChat 管理后台</h1>
+        <h1>MoltChat 管理后台</h1>
         <nav>
           <NavLink to="/org" end className={({ isActive }) => (isActive ? 'active' : '')}>
             组织架构

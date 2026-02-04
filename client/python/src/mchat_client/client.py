@@ -1,5 +1,5 @@
 """
-MChat Python 客户端：MQTT 连接、请求-响应、收件箱/群订阅与事件
+MoltChat Python 客户端：MQTT 连接、请求-响应、收件箱/群订阅与事件
 """
 
 import json
@@ -29,7 +29,7 @@ def _gen_client_id(employee_id: str, device_id: Optional[str] = None) -> str:
 
 
 class MChatClient:
-    """MChat 客户端，与《消息交互接口与示例》一致。"""
+    """MoltChat 客户端，与《消息交互接口与示例》一致。"""
 
     def __init__(
         self,

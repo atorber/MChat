@@ -1,4 +1,4 @@
-# MChat 服务端
+# MoltChat 服务端
 
 依据《技术设计方案》实现的 Node.js + TypeScript 服务端：统一配置、MQTT 网关、MySQL、各 Action Handler。
 

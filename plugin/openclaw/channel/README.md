@@ -1,11 +1,11 @@
 # openclaw-channel-mchat
 
-OpenClaw 渠道插件：将 **MChat** 作为聊天渠道接入 OpenClaw，与 WhatsApp、Telegram、Discord 等并列。
+OpenClaw 渠道插件：将 **MoltChat** 作为聊天渠道接入 OpenClaw，与 WhatsApp、Telegram、Discord 等并列。
 
 ## 要求
 
 - Node.js >= 18
-- 已部署 MChat 服务端与 MQTT Broker，并至少有一个员工账号（MQTT 凭证）
+- 已部署 MoltChat 服务端与 MQTT Broker，并至少有一个员工账号（MQTT 凭证）
 - OpenClaw 支持通过插件注册渠道（见 [OpenClaw Plugin Manifest](https://docs.clawd.bot/plugins/manifest)）
 
 ## 安装
@@ -14,9 +14,9 @@ OpenClaw 渠道插件：将 **MChat** 作为聊天渠道接入 OpenClaw，与 Wh
 # 从 npm（需先发布 mchat-client 与本包）
 npm install openclaw-channel-mchat
 
-# 或从 MChat 仓库本地开发（先构建 client/node，再在插件目录安装本地 mchat-client）
-cd MChat/client/node && npm run build
-cd MChat/plugin/openclaw/channel
+# 或从 MoltChat 仓库本地开发（先构建 client/node，再在插件目录安装本地 mchat-client）
+cd MoltChat/client/node && npm run build
+cd MoltChat/plugin/openclaw/channel
 npm install "mchat-client@file:../../../../client/node"
 # 若 npm 创建的 file: 链接错误导致无法解析，可手动修正：
 # cd node_modules && rm -f mchat-client && ln -s ../../../../client/node mchat-client && cd ..
@@ -74,7 +74,7 @@ await channel.stop();
 ```
 
 - **thread**：单聊为对方 `employee_id`，群聊为 `group_id`（建议群 ID 使用 `grp_` 前缀以便自动识别）。
-- **content**：字符串或 `{ type, body }`，与 MChat 消息格式一致。
+- **content**：字符串或 `{ type, body }`，与 MoltChat 消息格式一致。
 
 ## 与 OpenClaw 的集成方式
 
@@ -87,10 +87,10 @@ OpenClaw 的渠道由 Gateway 在进程内加载，具体加载方式与 Provide
 
 ## 相关文档
 
-- [MChat 适配 OpenClaw 技术方案](https://github.com/your-org/MChat/blob/main/.knowledge/MChat适配OpenClaw技术方案.md)（仓库 `.knowledge/`）
-- [OpenClaw 集成使用说明](https://github.com/your-org/MChat/blob/main/docs/integration/openclaw.md)（用户配置与使用）
-- [MChat 消息交互接口](https://github.com/your-org/MChat/blob/main/docs/api/index.md)
+- [MoltChat 适配 OpenClaw 技术方案](https://github.com/your-org/MoltChat/blob/main/.knowledge/MChat适配OpenClaw技术方案.md)（仓库 `.knowledge/`）
+- [OpenClaw 集成使用说明](https://github.com/your-org/MoltChat/blob/main/docs/integration/openclaw.md)（用户配置与使用）
+- [MoltChat 消息交互接口](https://github.com/your-org/MoltChat/blob/main/docs/api/index.md)
 
 ## License
 
-与 MChat 仓库一致（见根目录 LICENSE）。
+与 MoltChat 仓库一致（见根目录 LICENSE）。

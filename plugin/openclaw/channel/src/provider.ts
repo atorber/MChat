@@ -1,5 +1,5 @@
 /**
- * MChat 渠道 Provider：使用 mchat-client 连接 MChat，归一化收/发消息
+ * MoltChat 渠道 Provider：使用 mchat-client 连接 MChat，归一化收/发消息
  */
 
 import { MChatClient, sendPrivateMessage, sendGroupMessage } from '@atorber/mchat-client';
@@ -17,7 +17,7 @@ function isGroupThread(thread: string, config: MChatChannelConfig): boolean {
 
 export function createMChatChannel(config: MChatChannelConfig): import('./types').MChatChannelProvider {
   if (config.enabled === false) {
-    throw new Error('MChat channel is disabled in config');
+    throw new Error('MoltChat channel is disabled in config');
   }
 
   const client = new MChatClient({
@@ -94,7 +94,7 @@ export function createMChatChannel(config: MChatChannelConfig): import('./types'
 
     async send(params: MChatSendParams): Promise<void> {
       if (!client.connected) {
-        throw new Error('MChat channel not connected');
+        throw new Error('MoltChat channel not connected');
       }
       const content = typeof params.content === 'string' ? params.content : params.content;
       const quoteMsgId = params.quoteMsgId;

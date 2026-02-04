@@ -1,8 +1,8 @@
 # MkDocs 配置，用于将 docs/ 发布为 GitHub Pages
-site_name: MChat 文档
-site_description: MChat 产品使用手册与消息交互接口
+site_name: MoltChat 文档
+site_description: MoltChat 产品使用手册与消息交互接口
 # site_url 留空则使用相对路径；发布后如需绝对链接可在 CI 中设置
-# 例如：https://<owner>.github.io/MChat/
+# 例如：https://<owner>.github.io/MoltChat/
 
 theme:
   name: material

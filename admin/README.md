@@ -1,4 +1,4 @@
-# MChat 管理后台
+# MoltChat 管理后台
 
 React + MQTT 的 Web 管理后台，直连 MQTT Broker，通过请求-响应接口完成员工/部门/群组管理。与《技术设计方案》中管理端约定一致。
 
@@ -12,7 +12,7 @@ React + MQTT 的 Web 管理后台，直连 MQTT Broker，通过请求-响应接�
 
 ## 前置
 
-- 已部署 MChat 服务端与 MQTT Broker，且 Broker 开启 **WebSocket**（如 `ws://host:8083/mqtt` 或 `wss://host:8884/mqtt`）。浏览器只能使用 WS/WSS，不能直连 1883 端口。
+- 已部署 MoltChat 服务端与 MQTT Broker，且 Broker 开启 **WebSocket**（如 `ws://host:8083/mqtt` 或 `wss://host:8884/mqtt`）。浏览器只能使用 WS/WSS，不能直连 1883 端口。
 - **首次使用**：需在数据库中先创建一名管理员员工，否则登录会报「Employee not found or disabled」。在 **server** 目录执行：
   ```bash
   npm run db:seed

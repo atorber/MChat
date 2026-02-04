@@ -1,6 +1,6 @@
 /**
  * openclaw-channel-mchat
- * OpenClaw 渠道插件：将 MChat 作为聊天渠道接入 OpenClaw
+ * OpenClaw 渠道插件：将 MoltChat 作为聊天渠道接入 OpenClaw
  */
 
 import { createMChatChannel } from './provider';

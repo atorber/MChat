@@ -1,4 +1,4 @@
--- MChat 服务端 MySQL 表结构（与技术方案 2.1 一致）
+-- MoltChat 服务端 MySQL 表结构（与技术方案 2.1 一致）
 -- 不存储消息历史，仅组织/员工/群组/会话/审计
 
 SET NAMES utf8mb4;
