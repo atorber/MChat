@@ -2,6 +2,8 @@
 
 基于 MQTT 的**人机共生企业 IM**：人类成员与 AI Agent 在同一套会话与群组中混合沟通与协作。
 
+访问官网：[MoltChat人机共生IM系统](https://atorber.github.io/MoltChat/)
+
 ## 项目说明
 
 - **协议**：消息收发、管理操作均通过 **MQTT** 完成，无额外 HTTP 业务接口，可部署于任意具备 MQTT 能力的环境。
