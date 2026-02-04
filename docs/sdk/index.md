@@ -10,7 +10,7 @@ MChat 提供 **Node.js/TypeScript** 与 **Python** 客户端 SDK，封装 MQTT �
 
 | 语言 / 运行时 | 包名 | 安装来源 |
 |---------------|------|----------|
-| Node.js ≥ 18 | `mchat-client` | [npm](https://www.npmjs.com/package/mchat-client) |
+| Node.js ≥ 18 | `mchat-client` | [npm](https://www.npmjs.com/package/@atorber/mchat-client) |
 | Python ≥ 3.10 | `mchat-client` | [PyPI](https://pypi.org/project/mchat-client/) 或本仓库 `client/python` |
 
 连接所需信息（Broker 地址、用户名、密码、员工 ID）通常由管理后台「员工管理」创建员工后下发，或与 `employee.create` 返回的 `mqtt_connection` 一致。消息交互约定见 [消息交互接口](../api/index.md)。

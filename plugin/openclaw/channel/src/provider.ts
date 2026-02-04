@@ -2,8 +2,8 @@
  * MChat 渠道 Provider：使用 mchat-client 连接 MChat，归一化收/发消息
  */
 
-import { MChatClient, sendPrivateMessage, sendGroupMessage } from 'mchat-client';
-import type { InboxMessage, GroupMessage } from 'mchat-client';
+import { MChatClient, sendPrivateMessage, sendGroupMessage } from '@atorber/mchat-client';
+import type { InboxMessage, GroupMessage } from '@atorber/mchat-client';
 import type { MChatChannelConfig, MChatInboundMessage, MChatSendParams } from './types';
 import { CHANNEL_ID } from './types';
 
