@@ -1,0 +1,28 @@
+# MkDocs 配置，用于将 docs/ 发布为 GitHub Pages
+site_name: MChat 文档
+site_description: MChat 产品使用手册与消息交互接口
+# site_url 留空则使用相对路径；发布后如需绝对链接可在 CI 中设置
+# 例如：https://<owner>.github.io/MChat/
+
+theme:
+  name: material
+  language: zh
+  palette:
+    - scheme: default
+      primary: indigo
+      toggle:
+        icon: material/brightness-7
+        name: 深色模式
+    - scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/brightness-4
+        name: 浅色模式
+
+nav:
+  - 首页: index.md
+  - 产品使用手册: 产品使用手册.md
+  - 消息交互接口与示例: 消息交互接口与示例.md
+
+plugins:
+  - search
