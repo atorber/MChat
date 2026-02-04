@@ -23,6 +23,7 @@ nav:
   - 首页: index.md
   - 产品使用手册: 产品使用手册.md
   - 消息交互接口与示例: 消息交互接口与示例.md
+  - SDK使用说明: SDK使用说明.md
 
 plugins:
   - search
