@@ -79,11 +79,16 @@ jobs:
 
       - name: Set version in plugin/openclaw/channel
         if: needs.set-version.outputs.version != ''
+        env:
+          PLUGIN_VERSION: ${{ needs.set-version.outputs.version }}
         run: |
           node -e "
           const fs = require('fs');
           const p = require('./plugin/openclaw/channel/package.json');
-          p.version = '${{ needs.set-version.outputs.version }}';
+          const v = process.env.PLUGIN_VERSION;
+          p.version = v;
+          if (p.dependencies && p.dependencies['@atorber/mchat-client'])
+            p.dependencies['@atorber/mchat-client'] = '^' + v;
           fs.writeFileSync('./plugin/openclaw/channel/package.json', JSON.stringify(p, null, 2));
           "
 
@@ -92,11 +97,20 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: "https://registry.npmjs.org"
 
-      - name: Install and publish plugin/openclaw/channel
+      - name: Install and build plugin/openclaw/channel
         working-directory: plugin/openclaw/channel
         run: |
           npm ci 2>/dev/null || npm install
-          npm publish --access public
+          npm run build
+
+      - name: Verify plugin package contents (npm pack)
+        working-directory: plugin/openclaw/channel
+        run: |
+          npm pack --dry-run 2>&1 | head -30
+
+      - name: Publish plugin/openclaw/channel to npm
+        working-directory: plugin/openclaw/channel
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
