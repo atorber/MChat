@@ -10,6 +10,10 @@
 | [消息交互接口与示例](消息交互接口与示例.md) | MQTT Topic、Payload 约定及完整接口示例，便于开发对接 |
 | [SDK 使用说明](SDK使用说明.md) | Node.js 与 Python 客户端 SDK 的安装、连接、API 与示例 |
 
+## 集成
+
+- [OpenClaw 集成技术方案](OpenClaw集成技术方案.md)：将 MChat 作为 OpenClaw 的聊天渠道（与 WhatsApp、Telegram 等并列）的完整技术方案与实现步骤。
+
 ## 相关链接
 
 - 仓库根目录 **README**：项目说明与快速开始
