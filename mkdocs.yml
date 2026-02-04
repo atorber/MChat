@@ -4,6 +4,18 @@ site_description: MoltChat 产品使用手册与消息交互接口
 # site_url 留空则使用相对路径；发布后如需绝对链接可在 CI 中设置
 # 例如：https://<owner>.github.io/MoltChat/
 
+# 启用 Mermaid 图渲染（Material 8.2.0+ 原生支持）
+# 保留主题常用扩展，并增加 mermaid 自定义 fence
+markdown_extensions:
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
 theme:
   name: material
   language: zh
