@@ -69,15 +69,32 @@ npm run dev
 # 全局安装
 npm install -g @atorber/mchat-server
 
-# 指定配置文件路径启动
+# 初始化数据库（首次部署）
+CONFIG_PATH=/path/to/your/config.yaml mchat-server db:init
+
+# 创建管理员账号（首次部署）
+CONFIG_PATH=/path/to/your/config.yaml mchat-server db:seed
+
+# 启动服务端
 CONFIG_PATH=/path/to/your/config.yaml mchat-server
 ```
 
 或临时运行（不安装到全局）：
 
 ```bash
+CONFIG_PATH=/path/to/your/config.yaml npx @atorber/mchat-server db:init
+CONFIG_PATH=/path/to/your/config.yaml npx @atorber/mchat-server db:seed
 CONFIG_PATH=/path/to/your/config.yaml npx @atorber/mchat-server
 ```
+
+CLI 支持以下命令：
+
+| 命令 | 说明 |
+|------|------|
+| `mchat-server` | 启动服务端 |
+| `mchat-server db:init` | 初始化数据库（创建库和表） |
+| `mchat-server db:seed` | 创建管理员账号 (employee_id=admin) |
+| `mchat-server help` | 显示帮助信息 |
 
 使用全局安装或 `npx` 时，默认会查找包内 `config/config.yaml`（包内仅含示例文件），因此**必须通过环境变量 `CONFIG_PATH` 指定实际配置文件路径**。
 

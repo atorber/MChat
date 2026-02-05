@@ -12,7 +12,16 @@ async function main(): Promise<void> {
   const config = loadConfig();
   const { host, port, user, password, database } = config.mysql;
 
-  const sqlPath = path.join(__dirname, 'init-db.sql');
+  // 兼容源码运行和 npm 安装后运行：
+  // - 源码: __dirname = src/db, sql 在同级目录
+  // - 编译后: __dirname = dist/db, sql 在 src/db
+  let sqlPath = path.join(__dirname, 'init-db.sql');
+  if (!fs.existsSync(sqlPath)) {
+    sqlPath = path.join(__dirname, '..', '..', 'src', 'db', 'init-db.sql');
+  }
+  if (!fs.existsSync(sqlPath)) {
+    throw new Error(`找不到 init-db.sql，请确保从正确的目录运行或 npm 包完整安装`);
+  }
   const fullSql = fs.readFileSync(sqlPath, 'utf8');
 
   // 第一段：CREATE DATABASE（不指定 database 连接）

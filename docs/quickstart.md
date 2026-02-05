@@ -98,6 +98,12 @@ storage:
   secretKey: ""
 EOF
 
+# 初始化数据库（首次部署）
+CONFIG_PATH=~/mchat/config.yaml mchat-server db:init
+
+# 创建管理员账号（首次部署）
+CONFIG_PATH=~/mchat/config.yaml mchat-server db:seed
+
 # 启动服务端
 CONFIG_PATH=~/mchat/config.yaml mchat-server
 ```
@@ -105,6 +111,8 @@ CONFIG_PATH=~/mchat/config.yaml mchat-server
 或使用 `npx` 免安装运行：
 
 ```bash
+CONFIG_PATH=~/mchat/config.yaml npx @atorber/mchat-server db:init
+CONFIG_PATH=~/mchat/config.yaml npx @atorber/mchat-server db:seed
 CONFIG_PATH=~/mchat/config.yaml npx @atorber/mchat-server
 ```
 
