@@ -57,8 +57,24 @@ final class SecurePrefs: ObservableObject {
     init() {
         self.mqttBrokerUrl = defaults.string(forKey: "gateway.mqtt.brokerUrl")?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         self.mqttUsername = defaults.string(forKey: "gateway.mqtt.username")?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        self.mqttPassword = getKeychain("gateway.mqtt.password") ?? ""
+        // Use local variable to avoid 'self' usage before initialization is complete
+        let password = SecurePrefs.readKeychain(keychainService + ".gateway.mqtt.password")
+        self.mqttPassword = password
         self.mchatEmployeeId = defaults.string(forKey: "mchat.employeeId")?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+    }
+    
+    /// Static helper to read keychain before init completes
+    private static func readKeychain(_ key: String) -> String {
+        var result: AnyObject?
+        let q: [String: Any] = [
+            String(kSecClass): kSecClassGenericPassword,
+            String(kSecAttrService): key,
+            String(kSecReturnData): true,
+            String(kSecMatchLimit): kSecMatchLimitOne
+        ]
+        let status = SecItemCopyMatching(q as CFDictionary, &result)
+        guard status == errSecSuccess, let data = result as? Data else { return "" }
+        return String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
     }
     
     func setMqttBrokerUrl(_ value: String) {
