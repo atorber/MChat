@@ -19,6 +19,8 @@ markdown_extensions:
 theme:
   name: material
   language: zh
+  features:
+    - navigation.expand
   palette:
     - scheme: default
       primary: indigo
