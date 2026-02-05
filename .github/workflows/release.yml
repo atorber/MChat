@@ -1,7 +1,8 @@
 # 发布 client/node、client/python、server、plugin/openclaw/channel/moltchat 到 npm / PyPI；
-# Release 发布时编译 Android 应用并将 APK 上传到该 Release。
+# Release 发布时编译 Android APK 和 iOS App 并上传到该 Release。
 # 触发：创建 Release 并打 tag（格式 v*，如 v1.0.0）或手动运行
 # 需在仓库 Settings → Secrets 中配置：NPM_TOKEN、PYPI_API_TOKEN
+# 可选配置（iOS 签名）：IOS_CERTIFICATE_BASE64、IOS_CERTIFICATE_PASSWORD、IOS_PROVISION_PROFILE_BASE64
 
 name: Release
 
@@ -207,6 +208,81 @@ jobs:
             -H "Content-Type: application/vnd.android.package-archive" \
             -T "$APK_PATH" \
             "${UPLOAD_URL}?name=${APK_NAME}"
+
+  # Release 发布时：编译 iOS 应用并将 App 上传到该 Release
+  build-ios-release:
+    runs-on: macos-14
+    if: github.event_name == 'release' && github.event.action == 'published'
+    needs: set-version
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Set version in client/ios (optional)
+        if: needs.set-version.outputs.version != ''
+        run: |
+          V="${{ needs.set-version.outputs.version }}"
+          # 更新 project.yml 中的 MARKETING_VERSION
+          sed -i '' "s/MARKETING_VERSION: \"[^\"]*\"/MARKETING_VERSION: \"$V\"/" client/ios/project.yml
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        working-directory: client/ios
+        run: xcodegen generate
+
+      - name: Resolve Swift Package dependencies
+        working-directory: client/ios
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project MoltChat.xcodeproj \
+            -scheme MoltChat \
+            -clonedSourcePackagesDirPath .spm
+
+      - name: Build iOS App (unsigned)
+        working-directory: client/ios
+        run: |
+          xcodebuild build \
+            -project MoltChat.xcodeproj \
+            -scheme MoltChat \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            -clonedSourcePackagesDirPath .spm \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            ONLY_ACTIVE_ARCH=NO
+
+      - name: Package iOS App
+        working-directory: client/ios
+        run: |
+          APP_PATH=$(find build -name "MoltChat.app" -type d | head -1)
+          if [ -z "$APP_PATH" ]; then
+            echo "::error::No .app found"
+            exit 1
+          fi
+          V="${{ needs.set-version.outputs.version }}"
+          ZIP_NAME="MoltChat-iOS-${V:-unsigned}.zip"
+          ditto -c -k --keepParent "$APP_PATH" "$ZIP_NAME"
+          echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
+
+      - name: Upload iOS App to Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ZIP_PATH="client/ios/${{ env.ZIP_NAME }}"
+          UPLOAD_URL="${{ github.event.release.upload_url }}"
+          UPLOAD_URL="${UPLOAD_URL%\{*}"
+          curl -sS -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Content-Type: application/zip" \
+            -T "$ZIP_PATH" \
+            "${UPLOAD_URL}?name=${{ env.ZIP_NAME }}"
 
   # 发布 client/python 到 PyPI
   publish-pypi:
