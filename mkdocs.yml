@@ -35,7 +35,7 @@ theme:
 
 nav:
   - 首页: index.md
-  - 后台管理系统: admin-web.md
+  - 快速开始: quickstart.md
   - 使用指南:
     - 总览: guide/index.md
     - 产品简介: guide/intro.md
@@ -43,6 +43,11 @@ nav:
     - 员工使用指南: guide/user.md
     - 典型场景: guide/scenarios.md
     - 常见问题: guide/faq.md
+  - 后台管理系统: admin-web.md
+  - 客户端:
+    - 总览: client/index.md
+    - Android: client/android.md
+    - iOS: client/ios.md
   - 消息交互接口:
     - 总览与一览: api/index.md
     - 通用约定: api/convention.md
@@ -50,10 +55,6 @@ nav:
     - 管理类接口: api/management.md
     - 消息类接口: api/messaging.md
     - 状态与扩展: api/status-and-ext.md
-  - 客户端:
-    - 总览: client/index.md
-    - Android: client/android.md
-    - iOS: client/ios.md
   - SDK:
     - 使用说明: sdk/index.md
     - Node.js: sdk/node.md
