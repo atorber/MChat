@@ -15,12 +15,12 @@ android {
   // sourceSets { getByName("main") { assets.srcDir(...) } }
 
   defaultConfig {
-    applicationId = "com.clawdbot.android"
+    applicationId = "com.atorber.moltchat"
     minSdk = 31
     targetSdk = 36
-    // 需大于设备已安装的 versionCode，避免 INSTALL_FAILED_VERSION_DOWNGRADE（如 202601260）
-    versionCode = 202602060
-    versionName = "0.2.1"
+    // 需大于设备已安装的 versionCode，避免 INSTALL_FAILED_VERSION_DOWNGRADE
+    versionCode = 202602070
+    versionName = "0.2.2"
   }
 
   buildTypes {

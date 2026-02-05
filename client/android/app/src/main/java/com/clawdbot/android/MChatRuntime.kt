@@ -4,6 +4,7 @@ import android.content.Context
 import com.clawdbot.android.mchat.MChatChatController
 import com.clawdbot.android.mchat.MChatConnection
 import com.clawdbot.android.mchat.MChatConnectionState
+import com.clawdbot.android.mchat.ChatHistoryCache
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * MChat 运行时：仅包含连接配置、MQTT 连接与聊天（员工列表、单聊收发）。
@@ -51,6 +53,23 @@ class MChatRuntime(context: Context) {
   fun setMqttPassword(value: String) = prefs.setMqttPassword(value)
   fun setMcHatEmployeeId(value: String) = prefs.setMcHatEmployeeId(value)
 
+  private val historyCache = ChatHistoryCache(appContext)
+
+  init {
+    scope.launch {
+      if (hasRequiredConfig()) connect()
+    }
+  }
+
+  private fun hasRequiredConfig(): Boolean {
+    val url = prefs.mqttBrokerUrl.value.trim()
+    val username = prefs.mqttUsername.value.trim()
+    val employeeId = prefs.mchatEmployeeId.value.trim()
+    if (url.isEmpty() || username.isEmpty() || employeeId.isEmpty()) return false
+    val (host, port, _) = parseBrokerUrl(url)
+    return host != null && port != null
+  }
+
   fun connect() {
     val url = prefs.mqttBrokerUrl.value.trim()
     val username = prefs.mqttUsername.value.trim()
@@ -66,44 +85,44 @@ class MChatRuntime(context: Context) {
       return
     }
     disconnect()
-    val conn = MChatConnection(
-      scope = scope,
-      brokerHost = host,
-      brokerPort = port,
-      useTls = useTls,
-      username = username,
-      password = password,
-      employeeId = employeeId,
-    )
-    val controller = MChatChatController(scope, conn)
-    conn.setInboxCallback { controller.handleInboxMessage(it) }
-    connection = conn
-    chatController = controller
+    _connectionState.value = MChatConnectionState.Connecting
     scope.launch {
-      conn.state.collect { state ->
-        _connectionState.value = state
-        _isConnected.value = state is MChatConnectionState.Connected
-        if (state is MChatConnectionState.Connected) {
-          controller.loadEmployees()
+      val cached = withContext(Dispatchers.IO) { historyCache.loadAll() }
+      val conn = MChatConnection(
+        scope = scope,
+        brokerHost = host,
+        brokerPort = port,
+        useTls = useTls,
+        username = username,
+        password = password,
+        employeeId = employeeId,
+      )
+      val controller = MChatChatController(
+        scope = scope,
+        connection = conn,
+        historyCache = historyCache,
+        initialMessagesByPeer = cached,
+      )
+      conn.setInboxCallback { controller.handleInboxMessage(it) }
+      connection = conn
+      chatController = controller
+      launch {
+        conn.state.collect { state ->
+          _connectionState.value = state
+          _isConnected.value = state is MChatConnectionState.Connected
+          if (state is MChatConnectionState.Connected) {
+            controller.selectPeer(null)
+            controller.loadEmployees()
+          }
         }
       }
+      launch { controller.employees.collect { _chatEmployees.value = it } }
+      launch { controller.messagesByPeer.collect { _chatMessagesByPeer.value = it } }
+      launch { controller.currentPeerId.collect { _chatCurrentPeerId.value = it } }
+      launch { controller.errorText.collect { _chatErrorText.value = it } }
+      launch { controller.sessions.collect { _chatSessions.value = it } }
+      conn.connect()
     }
-    scope.launch {
-      controller.employees.collect { _chatEmployees.value = it }
-    }
-    scope.launch {
-      controller.messagesByPeer.collect { _chatMessagesByPeer.value = it }
-    }
-    scope.launch {
-      controller.currentPeerId.collect { _chatCurrentPeerId.value = it }
-    }
-    scope.launch {
-      controller.errorText.collect { _chatErrorText.value = it }
-    }
-    scope.launch {
-      controller.sessions.collect { _chatSessions.value = it }
-    }
-    conn.connect()
   }
 
   fun disconnect() {

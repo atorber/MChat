@@ -18,17 +18,20 @@ import java.util.UUID
 
 /**
  * MChat 聊天控制：会话=员工(employee_id)，发 msg.send_private，收件箱投递解析后按 from_employee_id 归入会话；员工列表来自 org.tree。
+ * 支持历史消息缓存：切换回对话时显示本地缓存，收发消息时写入缓存。
  */
 class MChatChatController(
   private val scope: CoroutineScope,
   private val connection: MChatConnection,
+  private val historyCache: ChatHistoryCache? = null,
+  initialMessagesByPeer: Map<String, List<ChatMessage>>? = null,
 ) {
   private val json = Json { ignoreUnknownKeys = true }
 
   private val _employees = MutableStateFlow<List<EmployeeEntry>>(emptyList())
   val employees: StateFlow<List<EmployeeEntry>> = _employees.asStateFlow()
 
-  private val _messagesByPeer = MutableStateFlow<Map<String, List<ChatMessage>>>(emptyMap())
+  private val _messagesByPeer = MutableStateFlow<Map<String, List<ChatMessage>>>(initialMessagesByPeer ?: emptyMap())
   val messagesByPeer: StateFlow<Map<String, List<ChatMessage>>> = _messagesByPeer.asStateFlow()
 
   private val _currentPeerId = MutableStateFlow<String?>(null)
@@ -39,6 +42,10 @@ class MChatChatController(
 
   private val _sessions = MutableStateFlow<List<ChatSessionEntry>>(emptyList())
   val sessions: StateFlow<List<ChatSessionEntry>> = _sessions.asStateFlow()
+
+  init {
+    (initialMessagesByPeer ?: emptyMap()).takeIf { it.isNotEmpty() }?.let { updateSessionsFromPeers(it.keys) }
+  }
 
   data class EmployeeEntry(
     val employee_id: String,
@@ -76,6 +83,7 @@ class MChatChatController(
         map[from] = list
         _messagesByPeer.value = map
         updateSessionsFromPeers(map.keys)
+        historyCache?.let { scope.launch { it.save(from, list) } }
       }
     } catch (e: Throwable) {
       Log.w("MChatChat", "handleInboxMessage parse error", e)
@@ -104,6 +112,7 @@ class MChatChatController(
           )
         }
         _employees.value = list
+        updateSessionsFromPeers(_messagesByPeer.value.keys)
       } catch (e: Throwable) {
         _errorText.value = e.message
       }
@@ -133,6 +142,7 @@ class MChatChatController(
         map[peerEmployeeId] = list
         _messagesByPeer.value = map
         updateSessionsFromPeers(map.keys)
+        historyCache?.let { scope.launch { it.save(peerEmployeeId, list) } }
       }
       val res = connection.request("msg.send_private", mapOf(
         "to_employee_id" to peerEmployeeId,

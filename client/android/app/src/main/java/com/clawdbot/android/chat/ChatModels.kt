@@ -1,5 +1,8 @@
 package com.clawdbot.android.chat
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class ChatMessage(
   val id: String,
   val role: String,
@@ -7,6 +10,7 @@ data class ChatMessage(
   val timestampMs: Long?,
 )
 
+@Serializable
 data class ChatMessageContent(
   val type: String = "text",
   val text: String? = null,

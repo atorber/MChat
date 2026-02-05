@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
@@ -35,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.clawdbot.android.MainViewModel
 import com.clawdbot.android.mchat.MChatConnectionState
+import com.clawdbot.android.ui.chat.ChatSheetContent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,6 +43,7 @@ fun RootScreen(viewModel: MainViewModel) {
   val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
   val safeOverlayInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
   val connectionState by viewModel.connectionState.collectAsState()
+  val currentPeerId by viewModel.chatCurrentPeerId.collectAsState()
   val statusText = when (connectionState) {
     is MChatConnectionState.Disconnected -> "未连接"
     is MChatConnectionState.Connecting -> "连接中…"
@@ -51,46 +52,33 @@ fun RootScreen(viewModel: MainViewModel) {
   }
 
   Box(modifier = Modifier.fillMaxSize()) {
-    Column(
+    Box(
       modifier = Modifier
         .fillMaxSize()
         .windowInsetsPadding(safeOverlayInsets)
-        .padding(24.dp),
-      verticalArrangement = Arrangement.Center,
-      horizontalAlignment = Alignment.CenterHorizontally,
+        .padding(top = 56.dp),
     ) {
-      Text("MChat", style = MaterialTheme.typography.headlineMedium)
-      Text(
-        "配置员工连接信息后登录，即可聊天、查看员工列表与查询员工信息",
-        style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.padding(top = 8.dp),
-      )
+      ChatSheetContent(viewModel = viewModel)
     }
 
-    Popup(alignment = Alignment.TopStart, properties = PopupProperties(focusable = false)) {
-      StatusPill(
-        gateway = if (connectionState is MChatConnectionState.Connected) GatewayState.Connected
-        else if (connectionState is MChatConnectionState.Connecting) GatewayState.Connecting
-        else if (connectionState is MChatConnectionState.Error) GatewayState.Error
-        else GatewayState.Disconnected,
-        voiceEnabled = false,
-        activity = null,
-        mqttStatus = statusText,
-        onClick = { sheet = Sheet.Settings },
-        modifier = Modifier.windowInsetsPadding(safeOverlayInsets).padding(start = 12.dp, top = 12.dp),
-      )
+    if (currentPeerId == null) {
+      Popup(alignment = Alignment.TopStart, properties = PopupProperties(focusable = false)) {
+        StatusPill(
+          gateway = if (connectionState is MChatConnectionState.Connected) GatewayState.Connected
+          else if (connectionState is MChatConnectionState.Connecting) GatewayState.Connecting
+          else if (connectionState is MChatConnectionState.Error) GatewayState.Error
+          else GatewayState.Disconnected,
+          voiceEnabled = false,
+          activity = null,
+          mqttStatus = statusText,
+          onClick = { sheet = Sheet.Settings },
+          modifier = Modifier.windowInsetsPadding(safeOverlayInsets).padding(start = 12.dp, top = 12.dp),
+        )
+      }
     }
 
     Popup(alignment = Alignment.TopEnd, properties = PopupProperties(focusable = false)) {
-      Column(
-        modifier = Modifier.windowInsetsPadding(safeOverlayInsets).padding(end = 12.dp, top = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        horizontalAlignment = Alignment.End,
-      ) {
-        OverlayIconButton(
-          onClick = { sheet = Sheet.Chat },
-          icon = { Icon(Icons.Default.ChatBubble, contentDescription = "聊天") },
-        )
+      Box(modifier = Modifier.windowInsetsPadding(safeOverlayInsets).padding(end = 12.dp, top = 12.dp)) {
         OverlayIconButton(
           onClick = { sheet = Sheet.Settings },
           icon = { Icon(Icons.Default.Settings, contentDescription = "设置") },
@@ -105,15 +93,12 @@ fun RootScreen(viewModel: MainViewModel) {
       onDismissRequest = { sheet = null },
       sheetState = sheetState,
     ) {
-      when (currentSheet) {
-        Sheet.Chat -> ChatSheet(viewModel = viewModel)
-        Sheet.Settings -> SettingsSheet(viewModel = viewModel)
-      }
+      SettingsSheet(viewModel = viewModel)
     }
   }
 }
 
-private enum class Sheet { Chat, Settings }
+private enum class Sheet { Settings }
 
 @Composable
 private fun OverlayIconButton(

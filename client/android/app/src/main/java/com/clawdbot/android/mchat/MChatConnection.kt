@@ -4,6 +4,7 @@ import android.util.Log
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,6 +31,8 @@ private const val INBOX_PREFIX = "mchat/inbox/"
 private const val QOS = 1
 private val UTF8 = Charsets.UTF_8
 private const val REQUEST_TIMEOUT_MS = 30_000L
+private const val INITIAL_RECONNECT_MS = 2_000L
+private const val MAX_RECONNECT_MS = 30_000L
 
 sealed class MChatConnectionState {
   data object Disconnected : MChatConnectionState()
@@ -71,6 +74,9 @@ class MChatConnection(
   private val pending = ConcurrentHashMap<String, CompletableDeferred<MqttResponse>>()
   @Volatile private var client: MqttAsyncClient? = null
   @Volatile private var connectionDeferred: CompletableDeferred<Unit>? = null
+  @Volatile private var userDisconnect = false
+  @Volatile private var reconnectJob: Job? = null
+  @Volatile private var reconnectBackoffMs = INITIAL_RECONNECT_MS
 
   private val employeeIdValue = employeeId.trim()
   private val respTopicPrefix = "$RESP_PREFIX$clientIdValue/"
@@ -79,12 +85,18 @@ class MChatConnection(
   data class MqttResponse(val code: Int, val message: String, val data: String?)
 
   fun connect() {
+    userDisconnect = false
+    reconnectJob?.cancel()
+    reconnectJob = null
     scope.launch(Dispatchers.IO) {
       doConnect(connectUsername, connectPassword)
     }
   }
 
   fun disconnect() {
+    userDisconnect = true
+    reconnectJob?.cancel()
+    reconnectJob = null
     scope.launch(Dispatchers.IO) {
       try {
         client?.disconnect()?.waitForCompletion(2000)
@@ -157,11 +169,13 @@ class MChatConnection(
     mqtt.setCallback(object : MqttCallback {
       override fun connectionLost(cause: Throwable?) {
         Log.w(TAG, "connectionLost: ${cause?.message}")
+        if (userDisconnect) return
         client = null
         connectionDeferred = null
         pending.values.forEach { it.cancel() }
         pending.clear()
         _state.value = MChatConnectionState.Disconnected
+        scheduleReconnect()
       }
 
       override fun messageArrived(topic: String, message: MqttMessage) {
@@ -207,6 +221,7 @@ class MChatConnection(
       }
 
       _state.value = MChatConnectionState.Connected
+      reconnectBackoffMs = INITIAL_RECONNECT_MS
       deferred.complete(Unit)
     } catch (e: Throwable) {
       Log.e(TAG, "connect failed", e)
@@ -214,6 +229,19 @@ class MChatConnection(
       client = null
       connectionDeferred = null
       deferred.completeExceptionally(e)
+      if (!userDisconnect) scheduleReconnect()
+    }
+  }
+
+  private fun scheduleReconnect() {
+    reconnectJob?.cancel()
+    val delayMs = reconnectBackoffMs
+    reconnectBackoffMs = (reconnectBackoffMs * 2).coerceAtMost(MAX_RECONNECT_MS)
+    Log.d(TAG, "scheduling reconnect in ${delayMs}ms (next backoff: ${reconnectBackoffMs}ms)")
+    reconnectJob = scope.launch(Dispatchers.IO) {
+      delay(delayMs)
+      if (userDisconnect) return@launch
+      doConnect(connectUsername, connectPassword)
     }
   }
 

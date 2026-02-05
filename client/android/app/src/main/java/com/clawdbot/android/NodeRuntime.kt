@@ -152,6 +152,11 @@ class NodeRuntime(context: Context) {
   private var nodeStatusText: String = "Offline"
   private var sharedMqttConnection: MqttGatewayConnection? = null
 
+  @Volatile private var gatewayUserDisconnect = false
+  private var gatewayReconnectJob: Job? = null
+  @Volatile private var gatewayReconnectBackoffMs = 2_000L
+  private val gatewayReconnectBackoffMaxMs = 30_000L
+
   private val _mqttConnectionState = MutableStateFlow<MqttConnectionState>(MqttConnectionState.Disconnected)
   val mqttConnectionState: StateFlow<MqttConnectionState> = _mqttConnectionState.asStateFlow()
 
@@ -356,6 +361,26 @@ class NodeRuntime(context: Context) {
     }
 
     scope.launch {
+      var prevState: MqttConnectionState = MqttConnectionState.Disconnected
+      _mqttConnectionState.collect { state ->
+        when (state) {
+          is MqttConnectionState.Connected -> {
+            gatewayReconnectBackoffMs = 2_000L
+          }
+          is MqttConnectionState.Disconnected -> {
+            val wasConnectedOrConnecting =
+              prevState is MqttConnectionState.Connected || prevState is MqttConnectionState.Connecting
+            if (wasConnectedOrConnecting && !gatewayUserDisconnect) {
+              scheduleGatewayReconnect()
+            }
+          }
+          else -> {}
+        }
+        prevState = state
+      }
+    }
+
+    scope.launch {
       combine(
         canvasDebugStatusEnabled,
         statusText,
@@ -541,6 +566,9 @@ class NodeRuntime(context: Context) {
   }
 
   fun connect() {
+    gatewayUserDisconnect = false
+    gatewayReconnectJob?.cancel()
+    gatewayReconnectJob = null
     operatorStatusText = "Connecting…"
     nodeStatusText = "Connecting…"
     updateStatus()
@@ -621,10 +649,25 @@ class NodeRuntime(context: Context) {
   }
 
   fun disconnect() {
+    gatewayUserDisconnect = true
+    gatewayReconnectJob?.cancel()
+    gatewayReconnectJob = null
     sharedMqttConnection = null
     _mqttConnectionState.value = MqttConnectionState.Disconnected
     operatorSession.disconnect()
     nodeSession.disconnect()
+  }
+
+  private fun scheduleGatewayReconnect() {
+    gatewayReconnectJob?.cancel()
+    val delayMs = gatewayReconnectBackoffMs
+    gatewayReconnectBackoffMs = (gatewayReconnectBackoffMs * 2).coerceAtMost(gatewayReconnectBackoffMaxMs)
+    Log.d("MoltbotGateway", "scheduling MQTT reconnect in ${delayMs}ms (next backoff: ${gatewayReconnectBackoffMs}ms)")
+    gatewayReconnectJob = scope.launch {
+      delay(delayMs)
+      if (gatewayUserDisconnect) return@launch
+      connect()
+    }
   }
 
   fun handleCanvasA2UIActionFromWebView(payloadJson: String) {
