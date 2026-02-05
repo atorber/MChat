@@ -18,8 +18,9 @@ android {
     applicationId = "com.clawdbot.android"
     minSdk = 31
     targetSdk = 36
-    versionCode = 200
-    versionName = "0.2.0"
+    // 需大于设备已安装的 versionCode，避免 INSTALL_FAILED_VERSION_DOWNGRADE（如 202601260）
+    versionCode = 202602060
+    versionName = "0.2.1"
   }
 
   buildTypes {

@@ -39,7 +39,7 @@ npm install @atorber/openclaw-channel-mchat
 若 OpenClaw 支持通过命令行添加插件，则使用其推荐方式，例如：
 
 ```bash
-openclaw plugins add @atorber/openclaw-channel-mchat
+openclaw plugins install @atorber/openclaw-channel-mchat
 ```
 
 安装完成后，执行 OpenClaw 的配置校验（如 `openclaw doctor`），确认插件已被识别且无报错。

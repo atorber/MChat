@@ -1,6 +1,6 @@
 {
-  "name": "@atorber/openclaw-channel-mchat",
-  "version": "0.2.3",
+  "name": "MoltChat",
+  "version": "0.2.4",
   "description": "OpenClaw channel plugin for MoltChat (MQTT-based enterprise IM)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -21,11 +21,12 @@
     "registry": "https://registry.npmjs.org/"
   },
   "openclaw": {
-    "extensions": [ "./dist/index.js" ]
+    "extensions": [ "./dist/index.js" ],
+    "pluginId": "MoltChat"
   },
   "keywords": [
     "openclaw",
-    "mchat",
+    "MoltChat",
     "channel",
     "mqtt",
     "im"
