@@ -9,6 +9,7 @@ MoltChat 提供多端客户端，供员工在不同设备上登录并收发消�
 | 客户端 | 说明 | 文档 |
 |--------|------|------|
 | **Android** | MoltChat App，手机端配置连接信息后即可登录、聊天、查看员工列表 | [Android](android.md) |
+| **iOS** | MoltChat App，iPhone/iPad 端配置连接信息后即可登录、聊天、查看员工列表 | [iOS](ios.md) |
 
 ---
 
