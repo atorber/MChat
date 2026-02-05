@@ -2,7 +2,7 @@
  * OpenClaw MoltChat 渠道配置与消息类型
  */
 
-export const CHANNEL_ID = 'mchat';
+export const CHANNEL_ID = 'moltchat';
 
 /** 插件配置（与 openclaw.plugin.json configSchema 一致） */
 export interface MChatChannelConfig {

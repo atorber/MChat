@@ -20,16 +20,16 @@ const mchatChannelPlugin = {
     id: CHANNEL_ID,
     label: 'MoltChat',
     selectionLabel: 'MoltChat (MQTT)',
-    docsPath: '/channels/mchat',
+    docsPath: '/channels/moltchat',
     blurb: 'MoltChat 企业 IM 渠道，基于 MQTT，支持单聊与群聊',
-    aliases: ['mchat'],
+    aliases: ['moltchat'],
   },
   capabilities: {
     chatTypes: ['direct', 'group'] as const,
   },
   config: {
-    listAccountIds: (cfg: { channels?: { mchat?: unknown } }) =>
-      cfg.channels?.mchat != null ? ['default'] : [],
+    listAccountIds: (cfg: { channels?: { moltchat?: unknown } }) =>
+      cfg.channels?.moltchat != null ? ['default'] : [],
     resolveAccount: (cfg: { channels?: { mchat?: MChatChannelConfig } }, accountId?: string) =>
       cfg.channels?.mchat ?? {},
   },

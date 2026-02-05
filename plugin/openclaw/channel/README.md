@@ -1,4 +1,4 @@
-# openclaw-channel-mchat
+# openclaw-channel-moltchat
 
 OpenClaw 渠道插件：将 **MoltChat** 作为聊天渠道接入 OpenClaw，与 WhatsApp、Telegram、Discord 等并列。
 
