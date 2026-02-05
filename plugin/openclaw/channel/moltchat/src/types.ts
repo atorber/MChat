@@ -15,6 +15,8 @@ export interface MChatChannelConfig {
   employeeId: string;
   clientId?: string;
   requestTimeoutMs?: number;
+  /** 服务实例 ID，用于 Topic 域隔离；不设置则兼容原有 topic（无前缀） */
+  serviceId?: string;
   /** 要订阅的群 ID 列表；不填则仅收件箱 */
   groupIds?: string[];
 }

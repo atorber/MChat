@@ -32,6 +32,8 @@ export interface StorageConfig {
 }
 
 export interface AppConfig {
+  /** 服务实例 ID，用于 Topic 域隔离；不设置或空则兼容原有 topic（无前缀） */
+  serviceId?: string;
   broker: BrokerConfig;
   mysql: MysqlConfig;
   storage: StorageConfig;

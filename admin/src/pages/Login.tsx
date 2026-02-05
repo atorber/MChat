@@ -10,6 +10,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [employeeId, setEmployeeId] = useState(() => localStorage.getItem('mchat_admin_employee_id') || '');
   const [clientIdOverride, setClientIdOverride] = useState(() => localStorage.getItem('mchat_admin_client_id') || '');
+  const [serviceId, setServiceId] = useState(() => localStorage.getItem('mchat_admin_service_id') || '');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -18,11 +19,13 @@ export default function Login() {
     setError('');
     setLoading(true);
     try {
-      await connect(wsUrl, username, password, employeeId || username, clientIdOverride || undefined);
+      await connect(wsUrl, username, password, employeeId || username, clientIdOverride || undefined, serviceId || undefined);
       localStorage.setItem('mchat_admin_ws_url', wsUrl);
       localStorage.setItem('mchat_admin_username', username);
       localStorage.setItem('mchat_admin_employee_id', employeeId || username);
       if (clientIdOverride) localStorage.setItem('mchat_admin_client_id', clientIdOverride);
+      if (serviceId) localStorage.setItem('mchat_admin_service_id', serviceId);
+      else localStorage.removeItem('mchat_admin_service_id');
       navigate('/', { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : '连接失败');
@@ -83,6 +86,15 @@ export default function Login() {
               value={clientIdOverride}
               onChange={(e) => setClientIdOverride(e.target.value)}
               placeholder="不填则用用户名（/ 会替换为 _）。若报 Identifier rejected 可填 Broker 要求的 Client ID"
+            />
+          </div>
+          <div className="form-row">
+            <label>Service ID（可选，多租户隔离）</label>
+            <input
+              type="text"
+              value={serviceId}
+              onChange={(e) => setServiceId(e.target.value)}
+              placeholder="不填则使用默认 topic（无前缀）。多实例部署时填写服务端配置的 serviceId"
             />
           </div>
           {error && <div className="error">{error}</div>}

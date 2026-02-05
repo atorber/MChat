@@ -19,7 +19,7 @@ MoltChat 提供 **Android 客户端**（MoltChat App），在手机上配置员�
 
 ## 功能
 
-- **设置**：配置 Broker 地址（如 `tcp://host:port` 或 `ssl://host:port`）、用户名、密码、员工 ID，连接/断开。
+- **设置**：配置 Broker 地址（如 `tcp://host:port` 或 `ssl://host:port`）、用户名、密码、员工 ID、服务 ID（可选，用于多实例隔离），连接/断开。
 - **聊天**：选择员工进行私聊，收发文本消息；员工列表通过 `org.tree` 获取，员工详情通过 `employee.get` 获取。
 
 ---

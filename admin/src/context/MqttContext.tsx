@@ -4,7 +4,7 @@ import { mqttApi } from '../mqtt/api';
 interface MqttContextValue {
   connected: boolean;
   employeeId: string | null;
-  connect: (wsUrl: string, username: string, password: string, employeeId: string, clientIdOverride?: string) => Promise<void>;
+  connect: (wsUrl: string, username: string, password: string, employeeId: string, clientIdOverride?: string, serviceId?: string) => Promise<void>;
   disconnect: () => void;
   request: <T = unknown>(action: string, params?: Record<string, unknown>) => Promise<{ code: number; message: string; data?: T }>;
 }
@@ -29,8 +29,8 @@ export function MqttProvider({ children }: { children: ReactNode }) {
   const [connected, setConnected] = useState(false);
   const [employeeId, setEmployeeId] = useState<string | null>(null);
 
-  const connect = useCallback(async (wsUrl: string, username: string, password: string, empId: string, clientIdOverride?: string) => {
-    await mqttApi.connect(wsUrl, username, password, clientIdOverride);
+  const connect = useCallback(async (wsUrl: string, username: string, password: string, empId: string, clientIdOverride?: string, serviceId?: string) => {
+    await mqttApi.connect(wsUrl, username, password, clientIdOverride, serviceId);
     const r = await mqttApi.request('auth.bind', { employee_id: empId });
     if (r.code !== 0) throw new Error(r.message || 'auth.bind failed');
     setEmployeeId(empId);

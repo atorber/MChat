@@ -5,11 +5,11 @@
 import mqtt, { type MqttClient } from 'mqtt';
 import type { MChatClientOptions, ApiResponse, InboxMessage, GroupMessage } from './types';
 
-const REQ_PREFIX = 'mchat/msg/req/';
-const RESP_PREFIX = 'mchat/msg/resp/';
-const INBOX_PREFIX = 'mchat/inbox/';
-const GROUP_PREFIX = 'mchat/group/';
-const STATUS_PREFIX = 'mchat/status/';
+/** 根据 serviceId 生成 topic 前缀：有 serviceId 则 "{serviceId}/mchat"，否则 "mchat" */
+function getTopicPrefix(serviceId?: string): string {
+  const sid = serviceId?.trim();
+  return sid ? `${sid}/mchat` : 'mchat';
+}
 
 type Pending = {
   resolve: (r: ApiResponse) => void;
@@ -31,6 +31,7 @@ export class MChatClient {
   private options: MChatClientOptions;
   private client: MqttClient | null = null;
   private clientId: string = '';
+  private topicPrefix: string = 'mchat';
   private pending = new Map<string, Pending>();
   private listeners: {
     inbox: ((payload: InboxMessage) => void)[];
@@ -45,7 +46,14 @@ export class MChatClient {
       requestTimeoutMs: 30000,
       ...options,
     };
+    this.topicPrefix = getTopicPrefix(options.serviceId);
   }
+
+  private get REQ_PREFIX(): string { return `${this.topicPrefix}/msg/req/`; }
+  private get RESP_PREFIX(): string { return `${this.topicPrefix}/msg/resp/`; }
+  private get INBOX_PREFIX(): string { return `${this.topicPrefix}/inbox/`; }
+  private get GROUP_PREFIX(): string { return `${this.topicPrefix}/group/`; }
+  private get STATUS_PREFIX(): string { return `${this.topicPrefix}/status/`; }
 
   /** 是否已连接 */
   get connected(): boolean {
@@ -63,7 +71,7 @@ export class MChatClient {
     const protocol = useTls ? 'mqtts' : 'mqtt';
     const url = `${protocol}://${brokerHost}:${brokerPort}`;
     const will = {
-      topic: `${STATUS_PREFIX}${employeeId}`,
+      topic: `${this.STATUS_PREFIX}${employeeId}`,
       payload: JSON.stringify({ status: 'offline', updated_at: new Date().toISOString() }),
       retain: true,
     };
@@ -111,19 +119,19 @@ export class MChatClient {
 
   private subscribeResp(c: MqttClient): Promise<void> {
     return new Promise((res, rej) => {
-      c.subscribe(`${RESP_PREFIX}${this.clientId}/+`, { qos: 1 }, (err) => (err ? rej(err) : res()));
+      c.subscribe(`${this.RESP_PREFIX}${this.clientId}/+`, { qos: 1 }, (err) => (err ? rej(err) : res()));
     });
   }
 
   private subscribeInbox(c: MqttClient): Promise<void> {
     return new Promise((res, rej) => {
-      c.subscribe(`${INBOX_PREFIX}${this.options.employeeId}`, { qos: 1 }, (err) => (err ? rej(err) : res()));
+      c.subscribe(`${this.INBOX_PREFIX}${this.options.employeeId}`, { qos: 1 }, (err) => (err ? rej(err) : res()));
     });
   }
 
   private publishOnline(c: MqttClient): Promise<void> {
     return new Promise((res, rej) => {
-      const topic = `${STATUS_PREFIX}${this.options.employeeId}`;
+      const topic = `${this.STATUS_PREFIX}${this.options.employeeId}`;
       const payload = JSON.stringify({ status: 'online', updated_at: new Date().toISOString() });
       c.publish(topic, payload, { qos: 1, retain: true }, (err) => (err ? rej(err) : res()));
     });
@@ -131,7 +139,7 @@ export class MChatClient {
 
   private requestOnce(c: MqttClient, action: string, params: Record<string, unknown>): Promise<ApiResponse> {
     const seqId = genSeqId();
-    const topic = `${REQ_PREFIX}${this.clientId}/${seqId}`;
+    const topic = `${this.REQ_PREFIX}${this.clientId}/${seqId}`;
     const payload = JSON.stringify({ action, ...params });
     const timeoutMs = this.options.requestTimeoutMs ?? 30000;
 
@@ -152,8 +160,8 @@ export class MChatClient {
   }
 
   private handleMessage(topic: string, payload: Buffer): void {
-    if (topic.startsWith(RESP_PREFIX + this.clientId + '/')) {
-      const seqId = topic.slice((RESP_PREFIX + this.clientId + '/').length);
+    if (topic.startsWith(this.RESP_PREFIX + this.clientId + '/')) {
+      const seqId = topic.slice((this.RESP_PREFIX + this.clientId + '/').length);
       const p = this.pending.get(seqId);
       if (p) {
         this.pending.delete(seqId);
@@ -167,15 +175,15 @@ export class MChatClient {
       }
       return;
     }
-    if (topic.startsWith(INBOX_PREFIX) && topic === `${INBOX_PREFIX}${this.options.employeeId}`) {
+    if (topic.startsWith(this.INBOX_PREFIX) && topic === `${this.INBOX_PREFIX}${this.options.employeeId}`) {
       try {
         const body = JSON.parse(payload.toString('utf8')) as InboxMessage;
         this.listeners.inbox.forEach((fn) => fn(body));
       } catch (_) {}
       return;
     }
-    if (topic.startsWith(GROUP_PREFIX)) {
-      const groupId = topic.slice(GROUP_PREFIX.length);
+    if (topic.startsWith(this.GROUP_PREFIX)) {
+      const groupId = topic.slice(this.GROUP_PREFIX.length);
       try {
         const body = JSON.parse(payload.toString('utf8')) as GroupMessage;
         this.listeners.group.forEach((fn) => fn(groupId, body));
@@ -195,12 +203,12 @@ export class MChatClient {
   subscribeGroup(groupId: string): Promise<void> {
     if (!this.client?.connected) return Promise.reject(new Error('Not connected'));
     return new Promise((res, rej) => {
-      this.client!.subscribe(`${GROUP_PREFIX}${groupId}`, { qos: 1 }, (err) => (err ? rej(err) : res()));
+      this.client!.subscribe(`${this.GROUP_PREFIX}${groupId}`, { qos: 1 }, (err) => (err ? rej(err) : res()));
     });
   }
 
   unsubscribeGroup(groupId: string): void {
-    this.client?.unsubscribe(`${GROUP_PREFIX}${groupId}`);
+    this.client?.unsubscribe(`${this.GROUP_PREFIX}${groupId}`);
   }
 
   on(

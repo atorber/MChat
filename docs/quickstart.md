@@ -21,6 +21,7 @@ cp config/config.sample.yaml config/config.yaml
 
 编辑 `config/config.yaml`：
 
+- **serviceId**（可选）：服务实例 ID，用于同一 Broker 部署多套服务时的 Topic 域隔离；单实例部署可不设置。
 - **broker**：MQTT Broker 的 host、port、useTls、username、password、clientId 等（与你的 Broker 控制台一致）。
 - **mysql**：MySQL 的 host、port、user、password、database。
 - **storage**（可选）：对象存储用于文件上传/下载；若暂不使用文件功能可先留空或保持示例值，后续再配。

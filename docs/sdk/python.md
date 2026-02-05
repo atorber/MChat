@@ -29,6 +29,7 @@ cd client/python && pip install -e .
 | `device_id`（可选） | 默认 `py` |
 | `request_timeout_ms`（可选） | 默认 30000 |
 | `skip_auth_bind`（可选） | 为 True 时不调用 auth.bind |
+| `service_id`（可选） | 服务实例 ID，用于 Topic 域隔离；不设置则兼容原有 topic |
 
 ## 基本用法
 

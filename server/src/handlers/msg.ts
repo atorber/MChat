@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ReqContext, RespPayload } from '../types';
 import { Code } from '../types';
 import type { Deps } from '../mqtt/router';
+import { getTopicPrefix } from '../mqtt/gateway';
 
 function msgId(): string {
   return 'msg_' + uuidv4().replace(/-/g, '').slice(0, 12);
@@ -28,7 +29,8 @@ export async function handleMsgSendPrivate(ctx: ReqContext, deps: Deps): Promise
 
   const msg_id = msgId();
   const sent_at = isoNow();
-  const topic = `mchat/inbox/${to_employee_id}`;
+  const topicPrefix = getTopicPrefix(deps.config.serviceId);
+  const topic = `${topicPrefix}/inbox/${to_employee_id}`;
   const payload = JSON.stringify({
     msg_id,
     type: 'private',
@@ -63,7 +65,8 @@ export async function handleMsgSendGroup(ctx: ReqContext, deps: Deps): Promise<R
 
   const msg_id = msgId();
   const sent_at = isoNow();
-  const topic = `mchat/group/${group_id}`;
+  const topicPrefix = getTopicPrefix(deps.config.serviceId);
+  const topic = `${topicPrefix}/group/${group_id}`;
   const payload = JSON.stringify({
     msg_id,
     group_id,

@@ -6,6 +6,15 @@
 - 默认会调用 **auth.bind**（payload 含 `employee_id`），在服务端建立 client_id 与 employee_id 的映射；若 Broker 已按身份认证且服务端能解析，可设置 `skipAuthBind` / `skip_auth_bind` 为 true 跳过。
 - 会发布**在线状态**到 `mchat/status/{employee_id}`（online），并设置 LWT 为 offline。
 
+## Topic 域隔离（serviceId）
+
+若同一 Broker 部署多套 MoltChat 服务实例，可设置 `serviceId`（Node）/ `service_id`（Python）实现 Topic 隔离：
+
+- **不设置**：Topic 为 `mchat/...`（兼容原有格式）
+- **设置值**：Topic 变为 `{serviceId}/mchat/...`
+
+示例：设置 `serviceId: 'org_acme'` 后，请求 Topic 变为 `org_acme/mchat/msg/req/{client_id}/{seq_id}`。
+
 ## 收件箱与群消息
 
 - **收件箱**（单聊、系统通知等）：连接后自动订阅 `mchat/inbox/{employee_id}`，通过 `on('inbox', ...)` 接收。
@@ -26,4 +35,5 @@
 | `MCHAT_PASSWORD` | MQTT 密码 |
 | `MCHAT_EMPLOYEE_ID` | 员工 ID（不设则用 USERNAME） |
 | `MCHAT_USE_TLS` | 为 `1` 时使用 TLS |
+| `MCHAT_SERVICE_ID` | 可选，服务实例 ID，用于 Topic 域隔离 |
 | `MCHAT_SEND_TO` | 可选，连接后向该 employee_id 发一条测试消息 |

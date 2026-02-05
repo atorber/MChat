@@ -6,17 +6,38 @@ import mqtt, { type MqttClient } from 'mqtt';
 import type { AppConfig } from '../types';
 import { routeRequest } from './router';
 
-const REQ_TOPIC_PREFIX = 'mchat/msg/req/';
-const RESP_TOPIC_PREFIX = 'mchat/msg/resp/';
+/** 根据 serviceId 生成 topic 前缀：有 serviceId 则 "{serviceId}/mchat"，否则 "mchat" */
+export function getTopicPrefix(serviceId?: string): string {
+  const sid = serviceId?.trim();
+  return sid ? `${sid}/mchat` : 'mchat';
+}
 
 export function createGateway(config: AppConfig): MqttClient {
-  const { broker } = config;
+  const { broker, serviceId } = config;
   const protocol = broker.useTls ? 'mqtts' : 'mqtt';
   const url = `${protocol}://${broker.host}:${broker.port}`;
 
+  const topicPrefix = getTopicPrefix(serviceId);
+  const REQ_TOPIC_PREFIX = `${topicPrefix}/msg/req/`;
+  const RESP_TOPIC_PREFIX = `${topicPrefix}/msg/resp/`;
+
   const subscribeTopic = broker.shareSubscription
-    ? `$share/${broker.shareSubscription}/mchat/msg/req/+/+`
-    : 'mchat/msg/req/+/+';
+    ? `$share/${broker.shareSubscription}/${topicPrefix}/msg/req/+/+`
+    : `${topicPrefix}/msg/req/+/+`;
+
+  const publishResponse = async (
+    clientId: string,
+    seqId: string,
+    code: number,
+    message: string,
+    data?: unknown
+  ): Promise<void> => {
+    const topic = `${RESP_TOPIC_PREFIX}${clientId}/${seqId}`;
+    const payload = JSON.stringify({ code, message, data: data ?? {} });
+    return new Promise((resolve, reject) => {
+      client.publish(topic, payload, { qos: 1 }, (err) => (err ? reject(err) : resolve()));
+    });
+  };
 
   const client = mqtt.connect(url, {
     clientId: broker.clientId,
@@ -54,23 +75,23 @@ export function createGateway(config: AppConfig): MqttClient {
       try {
         body = JSON.parse(payload.toString('utf8')) as Record<string, unknown>;
       } catch {
-        await publishResponse(client, client_id, seq_id, 400, 'Invalid JSON', undefined);
+        await publishResponse(client_id, seq_id, 400, 'Invalid JSON', undefined);
         return;
       }
 
       action = typeof body.action === 'string' ? body.action : '';
       if (!action) {
-        await publishResponse(client, client_id, seq_id, 400, 'Missing action', undefined);
+        await publishResponse(client_id, seq_id, 400, 'Missing action', undefined);
         return;
       }
 
       const result = await routeRequest(config, client, client_id, seq_id, action, body);
       code = result.code;
-      await publishResponse(client, client_id, seq_id, result.code, result.message, result.data);
+      await publishResponse(client_id, seq_id, result.code, result.message, result.data);
     } catch (err) {
       console.error('[gateway] handle error', err);
       if (client_id && seq_id) {
-        await publishResponse(client, client_id, seq_id, 500, 'Server error', undefined);
+        await publishResponse(client_id, seq_id, 500, 'Server error', undefined);
       }
     } finally {
       console.log('[gateway]', { client_id, seq_id, action: action || '-', code, latency_ms: Date.now() - start });
@@ -80,23 +101,4 @@ export function createGateway(config: AppConfig): MqttClient {
   client.on('error', (err) => console.error('[gateway] mqtt error', err));
 
   return client;
-}
-
-export function respTopic(clientId: string, seqId: string): string {
-  return `${RESP_TOPIC_PREFIX}${clientId}/${seqId}`;
-}
-
-export async function publishResponse(
-  client: MqttClient,
-  clientId: string,
-  seqId: string,
-  code: number,
-  message: string,
-  data?: unknown
-): Promise<void> {
-  const topic = respTopic(clientId, seqId);
-  const payload = JSON.stringify({ code, message, data: data ?? {} });
-  return new Promise((resolve, reject) => {
-    client.publish(topic, payload, { qos: 1 }, (err) => (err ? reject(err) : resolve()));
-  });
 }

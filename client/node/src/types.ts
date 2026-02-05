@@ -24,6 +24,8 @@ export interface MChatClientOptions {
   requestTimeoutMs?: number;
   /** 为 true 时连接后不调用 auth.bind（Broker 已按身份认证时可省） */
   skipAuthBind?: boolean;
+  /** 服务实例 ID，用于 Topic 域隔离；不设置则兼容原有 topic（无前缀） */
+  serviceId?: string;
 }
 
 /** 请求响应体 */

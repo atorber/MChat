@@ -28,6 +28,7 @@ cd client/node && npm install && npm run build
 - `username`（如 employee_id）/ `password`
 - `employeeId`：当前员工 ID，用于 auth.bind、收件箱订阅、在线状态
 - 可选 `clientId`、`deviceId`、`requestTimeoutMs`、`skipAuthBind`
+- 可选 `serviceId`：服务实例 ID，用于 Topic 域隔离；不设置则兼容原有 topic（无前缀）
 
 ## 使用示例
 

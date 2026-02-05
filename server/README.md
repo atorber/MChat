@@ -19,7 +19,8 @@
 
 1. 复制 `config/config.sample.yaml` 为 `config/config.yaml`。
 2. 填写 `broker`（host/port/useTls/clientId/username/password）、`mysql`（host/port/user/password/database）、`storage`（endpoint/region/bucket/accessKey/secretKey）。
-3. 可通过环境变量 `CONFIG_PATH` 指定配置文件路径。
+3. 可选：配置 `serviceId` 用于多实例隔离（同一 Broker 部署多套服务时），格式为小写字母+数字+下划线，1-32字符。不设置则兼容原有 topic（无前缀）。
+4. 可通过环境变量 `CONFIG_PATH` 指定配置文件路径。
 
 ## 数据库
 
@@ -115,4 +116,19 @@ server/
 
 ## 接口约定
 
-与《消息交互接口与示例》一致：请求 Topic `mchat/msg/req/{client_id}/{seq_id}`，Payload 含 `action` 及业务参数；响应 Topic `mchat/msg/resp/{client_id}/{seq_id}`，Payload 含 `code`、`message`、`data`。
+与《消息交互接口与示例》一致：
+
+- 请求 Topic：`mchat/msg/req/{client_id}/{seq_id}`
+- 响应 Topic：`mchat/msg/resp/{client_id}/{seq_id}`
+- Payload 含 `action` 及业务参数；响应含 `code`、`message`、`data`
+
+### 多实例隔离（serviceId）
+
+若配置了 `serviceId`，所有 Topic 将增加前缀 `{serviceId}/`：
+
+- 请求 Topic：`{serviceId}/mchat/msg/req/{client_id}/{seq_id}`
+- 响应 Topic：`{serviceId}/mchat/msg/resp/{client_id}/{seq_id}`
+- 收件箱：`{serviceId}/mchat/inbox/{employee_id}`
+- 群消息：`{serviceId}/mchat/group/{group_id}`
+
+不设置 `serviceId` 时保持原有格式，向后兼容。

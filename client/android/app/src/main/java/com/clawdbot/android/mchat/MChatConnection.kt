@@ -25,10 +25,13 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 private const val TAG = "MChatConnection"
-private const val REQ_PREFIX = "mchat/msg/req/"
-private const val RESP_PREFIX = "mchat/msg/resp/"
-private const val INBOX_PREFIX = "mchat/inbox/"
 private const val QOS = 1
+
+/** 根据 serviceId 生成 topic 前缀：有 serviceId 则 "{serviceId}/mchat"，否则 "mchat" */
+private fun getTopicPrefix(serviceId: String?): String {
+  val sid = serviceId?.trim()?.takeIf { it.isNotEmpty() }
+  return if (sid != null) "$sid/mchat" else "mchat"
+}
 private val UTF8 = Charsets.UTF_8
 private const val REQUEST_TIMEOUT_MS = 30_000L
 private const val INITIAL_RECONNECT_MS = 2_000L
@@ -53,6 +56,8 @@ class MChatConnection(
   password: String,
   employeeId: String,
   clientId: String? = null,
+  /** 服务实例 ID，用于 Topic 域隔离；不设置则兼容原有 topic（无前缀） */
+  serviceId: String? = null,
 ) {
   @Volatile private var onInboxMessage: ((String) -> Unit)? = null
   fun setInboxCallback(callback: (String) -> Unit) { onInboxMessage = callback }
@@ -81,8 +86,11 @@ class MChatConnection(
   private val employeeIdValue = employeeId.trim()
   /** 当前连接使用的员工 ID，用于按身份隔离历史会话缓存。 */
   val myEmployeeId: String get() = employeeIdValue
-  private val respTopicPrefix = "$RESP_PREFIX$clientIdValue/"
-  private val inboxTopic = "$INBOX_PREFIX$employeeIdValue"
+
+  private val topicPrefix = getTopicPrefix(serviceId)
+  private val reqPrefix = "$topicPrefix/msg/req/"
+  private val respTopicPrefix = "$topicPrefix/msg/resp/$clientIdValue/"
+  private val inboxTopic = "$topicPrefix/inbox/$employeeIdValue"
 
   data class MqttResponse(val code: Int, val message: String, val data: String?)
 
@@ -115,7 +123,7 @@ class MChatConnection(
   suspend fun request(action: String, params: Map<String, Any?>): MqttResponse {
     ensureConnected()
     val seqId = "seq_${UUID.randomUUID().toString().take(8)}_${System.currentTimeMillis()}"
-    val topic = "${REQ_PREFIX}$clientIdValue/$seqId"
+    val topic = "$reqPrefix$clientIdValue/$seqId"
     val payload = buildString {
       append("{\"action\":\"$action\"")
       params.forEach { (k, v) ->

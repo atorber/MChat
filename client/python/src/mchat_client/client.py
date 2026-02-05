@@ -11,11 +11,11 @@ from typing import Any, Callable, Dict, List, Optional
 
 import paho.mqtt.client as mqtt
 
-REQ_PREFIX = "mchat/msg/req/"
-RESP_PREFIX = "mchat/msg/resp/"
-INBOX_PREFIX = "mchat/inbox/"
-GROUP_PREFIX = "mchat/group/"
-STATUS_PREFIX = "mchat/status/"
+
+def _get_topic_prefix(service_id: Optional[str]) -> str:
+    """根据 service_id 生成 topic 前缀：有 service_id 则 "{service_id}/mchat"，否则 "mchat" """
+    sid = service_id.strip() if service_id else ""
+    return f"{sid}/mchat" if sid else "mchat"
 
 
 def _gen_seq_id() -> str:
@@ -43,6 +43,7 @@ class MChatClient:
         device_id: Optional[str] = None,
         request_timeout_ms: int = 30000,
         skip_auth_bind: bool = False,
+        service_id: Optional[str] = None,
     ):
         self._broker_host = broker_host
         self._broker_port = broker_port
@@ -53,6 +54,15 @@ class MChatClient:
         self._client_id = (client_id or "").strip() or _gen_client_id(employee_id, device_id)
         self._request_timeout_ms = request_timeout_ms
         self._skip_auth_bind = skip_auth_bind
+        self._service_id = service_id
+
+        # Topic 前缀（根据 service_id 动态生成）
+        topic_prefix = _get_topic_prefix(service_id)
+        self._req_prefix = f"{topic_prefix}/msg/req/"
+        self._resp_prefix = f"{topic_prefix}/msg/resp/"
+        self._inbox_prefix = f"{topic_prefix}/inbox/"
+        self._group_prefix = f"{topic_prefix}/group/"
+        self._status_prefix = f"{topic_prefix}/status/"
 
         self._client: Optional[mqtt.Client] = None
         self._pending: Dict[str, Dict[str, Any]] = {}
@@ -90,7 +100,7 @@ class MChatClient:
 
             will_payload = json.dumps({"status": "offline", "updated_at": time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())})
             client.will_set(
-                f"{STATUS_PREFIX}{self._employee_id}",
+                f"{self._status_prefix}{self._employee_id}",
                 will_payload,
                 qos=1,
                 retain=True,
@@ -124,10 +134,10 @@ class MChatClient:
             self._connect_event.set()
             return
         try:
-            client.subscribe(f"{RESP_PREFIX}{self._client_id}/+", qos=1)
-            client.subscribe(f"{INBOX_PREFIX}{self._employee_id}", qos=1)
+            client.subscribe(f"{self._resp_prefix}{self._client_id}/+", qos=1)
+            client.subscribe(f"{self._inbox_prefix}{self._employee_id}", qos=1)
             online_payload = json.dumps({"status": "online", "updated_at": time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())})
-            client.publish(f"{STATUS_PREFIX}{self._employee_id}", online_payload, qos=1, retain=True)
+            client.publish(f"{self._status_prefix}{self._employee_id}", online_payload, qos=1, retain=True)
             if not self._skip_auth_bind:
                 try:
                     r = self._request_impl(client, "auth.bind", {"employee_id": self._employee_id})
@@ -151,8 +161,9 @@ class MChatClient:
             payload_str = msg.payload.decode("utf-8") if isinstance(msg.payload, bytes) else msg.payload
         except Exception:
             return
-        if topic.startswith(RESP_PREFIX + self._client_id + "/"):
-            seq_id = topic[len(RESP_PREFIX + self._client_id + "/") :]
+        resp_client_prefix = f"{self._resp_prefix}{self._client_id}/"
+        if topic.startswith(resp_client_prefix):
+            seq_id = topic[len(resp_client_prefix):]
             with self._pending_lock:
                 p = self._pending.pop(seq_id, None)
             if p:
@@ -164,7 +175,7 @@ class MChatClient:
                     p["event"].set()
                     p["error"] = ValueError("Invalid response JSON")
             return
-        if topic == f"{INBOX_PREFIX}{self._employee_id}":
+        if topic == f"{self._inbox_prefix}{self._employee_id}":
             try:
                 body = json.loads(payload_str)
                 for fn in self._listeners["inbox"]:
@@ -175,8 +186,8 @@ class MChatClient:
             except Exception:
                 pass
             return
-        if topic.startswith(GROUP_PREFIX):
-            group_id = topic[len(GROUP_PREFIX) :]
+        if topic.startswith(self._group_prefix):
+            group_id = topic[len(self._group_prefix):]
             try:
                 body = json.loads(payload_str)
                 for fn in self._listeners["group"]:
@@ -200,7 +211,7 @@ class MChatClient:
 
     def _request_impl(self, client: mqtt.Client, action: str, params: Dict[str, Any]) -> Dict[str, Any]:
         seq_id = _gen_seq_id()
-        topic = f"{REQ_PREFIX}{self._client_id}/{seq_id}"
+        topic = f"{self._req_prefix}{self._client_id}/{seq_id}"
         payload = json.dumps({"action": action, **params})
         event = threading.Event()
         with self._pending_lock:
@@ -233,12 +244,12 @@ class MChatClient:
         """订阅群消息。"""
         if not self._client or not self._client.is_connected():
             raise RuntimeError("Not connected")
-        self._client.subscribe(f"{GROUP_PREFIX}{group_id}", qos=1)
+        self._client.subscribe(f"{self._group_prefix}{group_id}", qos=1)
 
     def unsubscribe_group(self, group_id: str) -> None:
         """取消订阅群。"""
         if self._client:
-            self._client.unsubscribe(f"{GROUP_PREFIX}{group_id}")
+            self._client.unsubscribe(f"{self._group_prefix}{group_id}")
 
     def on(self, event: str, fn: Callable[..., None]) -> None:
         """注册事件：inbox, group, connect, offline, error。"""

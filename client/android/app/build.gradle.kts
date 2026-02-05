@@ -20,7 +20,7 @@ android {
     targetSdk = 36
     // 需大于设备已安装的 versionCode，避免 INSTALL_FAILED_VERSION_DOWNGRADE
     versionCode = 202602070
-    versionName = "0.2.2"
+    versionName = "0.3.0"
   }
 
   buildTypes {

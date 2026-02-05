@@ -26,6 +26,16 @@ function validate(config: unknown): asserts config is AppConfig {
   if (!config || typeof config !== 'object') throw new Error('配置必须为对象');
   const c = config as Record<string, unknown>;
 
+  // serviceId 可选，若设置则校验格式
+  if (c.serviceId !== undefined && c.serviceId !== null && c.serviceId !== '') {
+    if (typeof c.serviceId !== 'string') {
+      throw new Error('serviceId 必须为字符串');
+    }
+    if (!/^[a-z0-9_]{1,32}$/.test(c.serviceId)) {
+      throw new Error('serviceId 格式错误：仅支持小写字母、数字、下划线，1-32字符');
+    }
+  }
+
   const broker = c.broker as Record<string, unknown> | undefined;
   if (!broker || typeof broker.host !== 'string' || typeof broker.port !== 'number') {
     throw new Error('配置缺少 broker.host / broker.port');

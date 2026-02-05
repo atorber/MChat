@@ -33,6 +33,7 @@ npm run dev
 - **MQTT 用户名 / 密码**：该员工的 Broker 登录凭证（与 employee 的 mqtt_username / mqtt_password 一致）。
 - **员工 ID**：用于 auth.bind，必须与数据库中某条员工的 `employee_id` 一致且状态为 active。**首次登录**请先执行 `cd server && npm run db:seed` 创建管理员后，此处填写 **admin**；与 Broker 用户名一致时可留空（将用用户名作为员工 ID）。
 - **Client ID（可选）**：若不填，则用「用户名」经简单清理后作为 MQTT ClientId。若出现 **Identifier rejected**，说明当前 Broker 对 ClientId 有要求（如必须与用户名完全一致、或仅允许某格式），请在产品文档中确认后在此填写 Broker 要求的 Client ID。
+- **Service ID（可选）**：多实例部署时填写服务端配置的 `serviceId`，用于 Topic 域隔离。不填则使用默认 topic（无前缀），适用于单实例部署。
 
 ## 构建
 

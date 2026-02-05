@@ -16,6 +16,14 @@ struct MqttResponse {
     let data: String?
 }
 
+/// 根据 serviceId 生成 topic 前缀：有 serviceId 则 "{serviceId}/mchat"，否则 "mchat"
+private func getTopicPrefix(_ serviceId: String?) -> String {
+    guard let sid = serviceId?.trimmingCharacters(in: .whitespacesAndNewlines), !sid.isEmpty else {
+        return "mchat"
+    }
+    return "\(sid)/mchat"
+}
+
 @MainActor
 final class MChatConnection {
     private let brokerHost: String
@@ -27,10 +35,13 @@ final class MChatConnection {
     /// 当前连接使用的员工 ID，用于按身份隔离历史会话缓存。
     var myEmployeeId: String { employeeId }
     private let clientIdValue: String
+    /// 服务实例 ID，用于 Topic 域隔离
+    private let serviceIdValue: String?
     
-    private let reqPrefix = "mchat/msg/req/"
-    private let respPrefix = "mchat/msg/resp/"
-    private let inboxPrefix = "mchat/inbox/"
+    private let topicPrefix: String
+    private let reqPrefix: String
+    private let respPrefixBase: String
+    private let inboxPrefixBase: String
     private let requestTimeout: TimeInterval = 30
     private let initialReconnect: TimeInterval = 2
     private let maxReconnect: TimeInterval = 30
@@ -48,10 +59,10 @@ final class MChatConnection {
     let stateSubject = CurrentValueSubject<MChatConnectionState, Never>(.disconnected)
     
     var clientId: String { clientIdValue }
-    var respTopicPrefix: String { "\(respPrefix)\(clientIdValue)/" }
-    var inboxTopic: String { "\(inboxPrefix)\(employeeId)" }
+    var respTopicPrefix: String { "\(respPrefixBase)\(clientIdValue)/" }
+    var inboxTopic: String { "\(inboxPrefixBase)\(employeeId)" }
     
-    init(brokerHost: String, brokerPort: Int, useTls: Bool, username: String, password: String, employeeId: String, clientId: String? = nil) {
+    init(brokerHost: String, brokerPort: Int, useTls: Bool, username: String, password: String, employeeId: String, clientId: String? = nil, serviceId: String? = nil) {
         self.brokerHost = brokerHost
         self.brokerPort = UInt16(min(max(brokerPort, 1), 65535))
         self.useTls = useTls
@@ -60,6 +71,11 @@ final class MChatConnection {
         self.employeeId = employeeId.trimmingCharacters(in: .whitespacesAndNewlines)
         self.clientIdValue = (clientId?.trimmingCharacters(in: .whitespacesAndNewlines)).flatMap { $0.isEmpty ? nil : $0 }
             ?? "\(employeeId)_ios_\(UUID().uuidString.prefix(8))"
+        self.serviceIdValue = serviceId?.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.topicPrefix = getTopicPrefix(serviceId)
+        self.reqPrefix = "\(self.topicPrefix)/msg/req/"
+        self.respPrefixBase = "\(self.topicPrefix)/msg/resp/"
+        self.inboxPrefixBase = "\(self.topicPrefix)/inbox/"
     }
     
     func setInboxCallback(_ callback: @escaping (String) -> Void) {

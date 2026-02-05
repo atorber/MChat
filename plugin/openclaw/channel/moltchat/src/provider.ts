@@ -41,6 +41,7 @@ export function createMChatChannel(
     employeeId: config.employeeId,
     clientId: config.clientId,
     requestTimeoutMs: config.requestTimeoutMs ?? 30000,
+    serviceId: config.serviceId,
   });
 
   (client as { on?: (ev: string, fn: () => void) => void }).on?.('connect', () => {

@@ -27,6 +27,7 @@ cd client/node && npm install && npm run build
 | `deviceId`（可选） | 设备标识，默认 `node` |
 | `requestTimeoutMs`（可选） | 请求超时毫秒，默认 30000 |
 | `skipAuthBind`（可选） | 为 true 时连接后不调用 auth.bind |
+| `serviceId`（可选） | 服务实例 ID，用于 Topic 域隔离；不设置则兼容原有 topic |
 
 ## 基本用法
 

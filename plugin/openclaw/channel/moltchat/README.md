@@ -68,6 +68,7 @@ Bundled 插件默认关闭，需通过 `plugins.entries.moltchat.enabled` 或 `o
           "username": "emp_your_bot",
           "password": "your_mqtt_password",
           "employeeId": "emp_your_bot",
+          "serviceId": "org_acme",
           "groupIds": ["grp_xxx"]
         }
       }
@@ -95,6 +96,7 @@ Bundled 插件默认关闭，需通过 `plugins.entries.moltchat.enabled` 或 `o
 }
 ```
 
+- `serviceId` 可选；服务实例 ID，用于 Topic 域隔离，同一 Broker 可部署多套服务。不设置则兼容原有 topic。
 - `groupIds` 可选；不填则仅接收收件箱（单聊/系统通知），填则额外订阅这些群并接收群消息。
 - 也支持旧键名 `channels.mchat`，与 `channels.moltchat` 等价。
 
@@ -121,6 +123,7 @@ const config: MChatChannelConfig = {
   username: 'emp_bot',
   password: 'xxx',
   employeeId: 'emp_bot',
+  serviceId: 'org_acme', // 可选：服务实例 ID，用于 Topic 域隔离
   groupIds: ['grp_xxx'],
 };
 const channel = createMChatChannel(config);

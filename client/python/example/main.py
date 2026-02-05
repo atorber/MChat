@@ -15,6 +15,7 @@ MoltChat Python SDK 示例
 
 可选：
   MCHAT_USE_TLS       为 1 时使用 TLS
+  MCHAT_SERVICE_ID    服务实例 ID，用于 Topic 域隔离；不设置则兼容原有 topic
   MCHAT_SEND_TO       若设置，连接后会向该 employee_id 发一条测试消息
 """
 
@@ -37,6 +38,7 @@ def main() -> None:
     username = os.environ.get("MCHAT_USERNAME")
     password = os.environ.get("MCHAT_PASSWORD")
     employee_id = os.environ.get("MCHAT_EMPLOYEE_ID") or username
+    service_id = os.environ.get("MCHAT_SERVICE_ID")  # 可选：服务实例 ID
     send_to = os.environ.get("MCHAT_SEND_TO")
 
     if not username or not password:
@@ -51,6 +53,7 @@ def main() -> None:
         password=password,
         employee_id=employee_id,
         request_timeout_ms=15000,
+        service_id=service_id,
     )
 
     client.on("connect", lambda: print("[example] 已连接"))

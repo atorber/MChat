@@ -1,6 +1,11 @@
 # MoltChat 服务端统一配置示例
 # 复制为 config.yaml 并填写实际值；config.yaml 勿提交版本库
 
+# 服务实例 ID，用于 Topic 域隔离，同一 Broker 可部署多套服务
+# 格式：小写字母+数字+下划线，1-32字符
+# 不设置或留空则兼容原有 topic（无前缀），适用于单实例部署
+# serviceId: org_acme
+
 broker:
   host: localhost
   port: 1883

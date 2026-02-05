@@ -27,6 +27,7 @@ cd client/android
    - **Broker 地址**：如 `tcp://broker.example.com:1883` 或 `ssl://broker.example.com:8883`
    - **用户名** / **密码**：Broker 认证
    - **员工 ID**：已在服务端/管理后台创建并下发的员工 ID
+   - **Service ID（可选）**：多实例部署时填写服务端配置的 serviceId，用于 Topic 域隔离；不填则使用默认 topic
 3. 点击 **连接**，状态栏显示已连接后，进入 **聊天** 即可选择员工进行私聊、收发消息。
 
 ## 权限

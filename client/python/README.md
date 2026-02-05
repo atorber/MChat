@@ -23,6 +23,7 @@ pip install -e .
 - `username`（如 employee_id）/ `password`
 - `employee_id`：当前员工 ID，用于 auth.bind、收件箱订阅、在线状态
 - 可选：`client_id`、`device_id`、`request_timeout_ms`、`skip_auth_bind`
+- `service_id`：可选，服务实例 ID，用于 Topic 域隔离；不设置则兼容原有 topic（无前缀）
 
 ## 使用示例
 

@@ -1,5 +1,20 @@
 # 通用约定
 
+## Topic 前缀与多实例隔离
+
+为支持同一 MQTT Broker 部署多套 MoltChat 服务实例，Topic 采用可选前缀：
+
+- **默认（单实例/兼容模式）**：不设置 `serviceId`，Topic 为 `mchat/...`
+- **多实例隔离**：设置 `serviceId`（如 `org_acme`），Topic 变为 `{serviceId}/mchat/...`
+
+示例：
+| serviceId 配置 | 请求 Topic 格式 | 收件箱 Topic 格式 |
+|---------------|----------------|------------------|
+| 不设置/空 | `mchat/msg/req/{client_id}/{seq_id}` | `mchat/inbox/{employee_id}` |
+| `org_acme` | `org_acme/mchat/msg/req/{client_id}/{seq_id}` | `org_acme/mchat/inbox/{employee_id}` |
+
+> 后续文档中以 `mchat/...` 为例，实际使用时根据 `serviceId` 配置自动添加前缀。
+
 ## 请求与响应
 
 - **请求**：客户端发布到 **`mchat/msg/req/{client_id}/{seq_id}`**。`client_id` 为当前连接身份，`seq_id` 为本次请求唯一序号（如 UUID），**以 Topic 为准**，用于响应路由与去重。

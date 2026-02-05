@@ -4,8 +4,11 @@
 
 import mqtt, { type MqttClient } from 'mqtt';
 
-const REQ_PREFIX = 'mchat/msg/req/';
-const RESP_PREFIX = 'mchat/msg/resp/';
+/** 根据 serviceId 生成 topic 前缀：有 serviceId 则 "{serviceId}/mchat"，否则 "mchat" */
+function getTopicPrefix(serviceId?: string): string {
+  const sid = serviceId?.trim();
+  return sid ? `${sid}/mchat` : 'mchat';
+}
 
 export interface MqttResponse {
   code: number;
@@ -30,6 +33,7 @@ function defaultClientId(username: string): string {
 export class MqttApi {
   private client: MqttClient | null = null;
   private clientId: string = '';
+  private serviceId: string = '';
   private pending = new Map<string, Pending>();
 
   get connected(): boolean {
@@ -40,8 +44,14 @@ export class MqttApi {
     return this.clientId;
   }
 
-  connect(wsUrl: string, username: string, password: string, clientIdOverride?: string): Promise<void> {
+  private get topicPrefix(): string {
+    return getTopicPrefix(this.serviceId);
+  }
+
+  connect(wsUrl: string, username: string, password: string, clientIdOverride?: string, serviceId?: string): Promise<void> {
     this.clientId = (clientIdOverride?.trim() || defaultClientId(username));
+    this.serviceId = serviceId?.trim() || '';
+    const RESP_PREFIX = `${this.topicPrefix}/msg/resp/`;
     return new Promise((resolve, reject) => {
       const c = mqtt.connect(wsUrl, {
         clientId: this.clientId,
@@ -61,8 +71,9 @@ export class MqttApi {
         });
       });
       c.on('message', (topic: string, payload: Buffer) => {
-        if (!topic.startsWith(RESP_PREFIX + this.clientId + '/')) return;
-        const seqId = topic.slice((RESP_PREFIX + this.clientId + '/').length);
+        const respPrefix = `${this.topicPrefix}/msg/resp/`;
+        if (!topic.startsWith(respPrefix + this.clientId + '/')) return;
+        const seqId = topic.slice((respPrefix + this.clientId + '/').length);
         const p = this.pending.get(seqId);
         if (!p) return;
         this.pending.delete(seqId);
@@ -81,6 +92,7 @@ export class MqttApi {
   request<T = unknown>(action: string, params: Record<string, unknown> = {}): Promise<MqttResponse & { data?: T }> {
     if (!this.client?.connected) return Promise.reject(new Error('Not connected'));
     const seqId = genSeqId();
+    const REQ_PREFIX = `${this.topicPrefix}/msg/req/`;
     const topic = `${REQ_PREFIX}${this.clientId}/${seqId}`;
     const payload = JSON.stringify({ action, ...params });
     return new Promise((resolve, reject) => {
@@ -106,6 +118,7 @@ export class MqttApi {
     this.pending.clear();
     this.client?.end(true);
     this.client = null;
+    this.serviceId = '';
   }
 }
 

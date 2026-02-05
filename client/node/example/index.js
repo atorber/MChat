@@ -16,6 +16,7 @@
  * 可选：
  *   MCHAT_USE_TLS       为 1 时使用 TLS
  *   MCHAT_SEND_TO       若设置，连接后会向该 employee_id 发一条测试消息
+ *   MCHAT_SERVICE_ID    服务实例 ID，用于 Topic 域隔离；不设置则兼容原有 topic
  */
 
 const {
@@ -32,6 +33,7 @@ const username = process.env.MCHAT_USERNAME;
 const password = process.env.MCHAT_PASSWORD;
 const employeeId = process.env.MCHAT_EMPLOYEE_ID || username;
 const sendTo = process.env.MCHAT_SEND_TO;
+const serviceId = process.env.MCHAT_SERVICE_ID || '';
 
 if (!username || !password) {
   console.error('请设置 MCHAT_USERNAME 和 MCHAT_PASSWORD');
@@ -46,6 +48,7 @@ const client = new MChatClient({
   password,
   employeeId,
   requestTimeoutMs: 15000,
+  serviceId: serviceId || undefined,
 });
 
 client.on('connect', () => {
