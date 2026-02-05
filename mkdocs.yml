@@ -21,6 +21,8 @@ theme:
   language: zh
   repo_url: https://github.com/atorber/MoltChat
   repo_name: GitHub
+  icon:
+    repo: fontawesome/brands/github
   features:
     - navigation.expand
   palette:
