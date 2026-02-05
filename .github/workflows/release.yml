@@ -37,24 +37,13 @@ jobs:
             echo "version=" >> $GITHUB_OUTPUT
           fi
 
-  # 发布 client/node 到 npm
+  # 发布 client/node 到 npm（使用 package.json 中的版本号）
   publish-npm-client:
     runs-on: ubuntu-latest
-    needs: set-version
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.release.tag_name || github.sha }}
-
-      - name: Set version in client/node
-        if: needs.set-version.outputs.version != ''
-        run: |
-          node -e "
-          const fs = require('fs');
-          const p = require('./client/node/package.json');
-          p.version = '${{ needs.set-version.outputs.version }}';
-          fs.writeFileSync('./client/node/package.json', JSON.stringify(p, null, 2));
-          "
 
       - uses: actions/setup-node@v4
         with:
@@ -70,28 +59,14 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   # 发布 plugin/openclaw/channel/moltchat（npm 包名 moltchat）到 npm（依赖 mchat-client，故在 client 之后）
+  # 使用 package.json 中的版本号
   publish-npm-plugin-openclaw-moltchat:
     runs-on: ubuntu-latest
-    needs: [set-version, publish-npm-client]
+    needs: publish-npm-client
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.release.tag_name || github.sha }}
-
-      - name: Set version in plugin/openclaw/channel/moltchat
-        if: needs.set-version.outputs.version != ''
-        env:
-          PLUGIN_VERSION: ${{ needs.set-version.outputs.version }}
-        run: |
-          node -e "
-          const fs = require('fs');
-          const p = require('./plugin/openclaw/channel/moltchat/package.json');
-          const v = process.env.PLUGIN_VERSION;
-          p.version = v;
-          if (p.dependencies && p.dependencies['@atorber/mchat-client'])
-            p.dependencies['@atorber/mchat-client'] = '^' + v;
-          fs.writeFileSync('./plugin/openclaw/channel/moltchat/package.json', JSON.stringify(p, null, 2));
-          "
 
       - uses: actions/setup-node@v4
         with:
@@ -121,24 +96,13 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  # 发布 server 到 npm
+  # 发布 server 到 npm（使用 package.json 中的版本号）
   publish-npm-server:
     runs-on: ubuntu-latest
-    needs: set-version
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.release.tag_name || github.sha }}
-
-      - name: Set version in server
-        if: needs.set-version.outputs.version != ''
-        run: |
-          node -e "
-          const fs = require('fs');
-          const p = require('./server/package.json');
-          p.version = '${{ needs.set-version.outputs.version }}';
-          fs.writeFileSync('./server/package.json', JSON.stringify(p, null, 2));
-          "
 
       - uses: actions/setup-node@v4
         with:
@@ -319,19 +283,13 @@ jobs:
             -T "$ZIP_PATH" \
             "${UPLOAD_URL}?name=${{ env.ZIP_NAME }}"
 
-  # 发布 client/python 到 PyPI
+  # 发布 client/python 到 PyPI（使用 pyproject.toml 中的版本号）
   publish-pypi:
     runs-on: ubuntu-latest
-    needs: set-version
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.release.tag_name || github.sha }}
-
-      - name: Set version in client/python
-        if: needs.set-version.outputs.version != ''
-        run: |
-          sed -i 's/^version = .*/version = "${{ needs.set-version.outputs.version }}"/' client/python/pyproject.toml
 
       - uses: actions/setup-python@v5
         with:
