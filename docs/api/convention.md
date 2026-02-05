@@ -8,6 +8,7 @@
 - **多实例隔离**：设置 `serviceId`（如 `org_acme`），Topic 变为 `{serviceId}/mchat/...`
 
 示例：
+
 | serviceId 配置 | 请求 Topic 格式 | 收件箱 Topic 格式 |
 |---------------|----------------|------------------|
 | 不设置/空 | `mchat/msg/req/{client_id}/{seq_id}` | `mchat/inbox/{employee_id}` |
