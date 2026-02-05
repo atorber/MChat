@@ -1,0 +1,30 @@
+# XcodeGen 配置 - 运行 xcodegen 生成 MoltChat.xcodeproj
+# 安装: brew install xcodegen
+name: MoltChat
+options:
+  bundleIdPrefix: com.atorber
+  deploymentTarget:
+    iOS: "15.0"
+  xcodeVersion: "15.0"
+  generateEmptyDirectories: true
+packages:
+  CocoaMQTT:
+    url: https://github.com/emqx/CocoaMQTT.git
+    from: "2.1.6"
+targets:
+  MoltChat:
+    type: application
+    platform: iOS
+    sources:
+      - path: MoltChat
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.atorber.moltchat
+        INFOPLIST_FILE: MoltChat/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SWIFT_EMIT_LOC_STRINGS: YES
+        TARGETED_DEVICE_FAMILY: "1,2"
+        MARKETING_VERSION: "0.2.2"
+        CURRENT_PROJECT_VERSION: "202602070"
+    dependencies:
+      - package: CocoaMQTT
