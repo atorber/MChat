@@ -35,6 +35,7 @@ theme:
 
 nav:
   - 首页: index.md
+  - 后台管理系统: admin-web.md
   - 使用指南:
     - 总览: guide/index.md
     - 产品简介: guide/intro.md
@@ -52,6 +53,7 @@ nav:
   - 客户端:
     - 总览: client/index.md
     - Android: client/android.md
+    - iOS: client/ios.md
   - SDK:
     - 使用说明: sdk/index.md
     - Node.js: sdk/node.md
