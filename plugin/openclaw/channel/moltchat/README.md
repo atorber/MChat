@@ -8,6 +8,12 @@ OpenClaw 渠道插件：将 **MoltChat** 作为聊天渠道接入 OpenClaw，与
 - 已部署 MoltChat 服务端与 MQTT Broker，并至少有一个员工账号（MQTT 凭证）
 - OpenClaw 支持通过插件注册渠道（见 [OpenClaw Plugin Manifest](https://docs.clawd.bot/plugins/manifest)）
 
+## 在OpenClaw中安装
+
+```bash
+openclaw plugins install moltchat
+```
+
 ## 安装
 
 ```bash
