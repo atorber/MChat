@@ -16,6 +16,30 @@ interface Department {
   name: string;
 }
 
+interface MqttConnection {
+  broker_host?: string;
+  broker_port?: number;
+  use_tls?: boolean;
+  mqtt_username?: string;
+  mqtt_password?: string;
+  auth_bind_employee_id?: string;
+  client_id_scheme?: string;
+}
+
+interface EmployeeDetail {
+  employee_id: string;
+  name: string;
+  department_id: string | null;
+  manager_id: string | null;
+  is_ai_agent: boolean;
+  agent_profile: unknown;
+  skills_badge: unknown;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  mqtt_connection: MqttConnection | null;
+}
+
 export default function Employees() {
   const { request } = useMqtt();
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -30,6 +54,9 @@ export default function Employees() {
   const [editForm, setEditForm] = useState<{ name: string; department_id: string; manager_id: string; status: string } | null>(null);
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editError, setEditError] = useState('');
+  const [viewDetail, setViewDetail] = useState<EmployeeDetail | null>(null);
+  const [viewDetailLoading, setViewDetailLoading] = useState(false);
+  const [connectionCopied, setConnectionCopied] = useState(false);
 
   const load = () => {
     request<{ departments: Department[]; employees: Employee[] }>('org.tree').then((res) => {
@@ -144,6 +171,50 @@ export default function Employees() {
     }
   };
 
+  const copyConnectionInfo = () => {
+    if (!viewDetail?.mqtt_connection) return;
+    const c = viewDetail.mqtt_connection;
+    const employeeId = c.auth_bind_employee_id ?? viewDetail.employee_id;
+    const obj = {
+      plugins: {
+        entries: {
+          moltchat: {
+            enabled: true,
+            config: {
+              brokerHost: c.broker_host ?? '',
+              brokerPort: c.broker_port ?? 1883,
+              useTls: Boolean(c.use_tls),
+              username: c.mqtt_username ?? '',
+              password: c.mqtt_password ?? '',
+              employeeId,
+              groupIds: [] as string[],
+            },
+          },
+        },
+      },
+    };
+    const text = JSON.stringify(obj, null, 2);
+    navigator.clipboard.writeText(text).then(() => {
+      setConnectionCopied(true);
+      setTimeout(() => setConnectionCopied(false), 2000);
+    }).catch(() => alert('复制失败'));
+  };
+
+  const openView = async (employee_id: string) => {
+    setViewDetail(null);
+    setConnectionCopied(false);
+    setViewDetailLoading(true);
+    try {
+      const r = await request<EmployeeDetail>('employee.get', { employee_id });
+      if (r.code === 0 && r.data) setViewDetail(r.data);
+      else alert(r.message || '获取失败');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '请求失败');
+    } finally {
+      setViewDetailLoading(false);
+    }
+  };
+
   return (
     <div className="card">
       <h2>员工管理</h2>
@@ -195,6 +266,64 @@ export default function Employees() {
                 <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>取消</button>
               </div>
             </form>
+          )}
+          {(viewDetailLoading && !viewDetail) && (
+            <div style={{ marginBottom: 20, padding: 16, background: '#f1f5f9', borderRadius: 8 }}>加载员工信息中…</div>
+          )}
+          {viewDetail && (
+            <div style={{ marginBottom: 20, padding: 16, background: '#f1f5f9', borderRadius: 8 }}>
+              <h3 style={{ margin: '0 0 12px', fontSize: 14 }}>员工信息：<code>{viewDetail.employee_id}</code></h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, maxWidth: 800 }}>
+                <div>
+                  <h4 style={{ margin: '0 0 8px', fontSize: 13, color: '#475569' }}>基本信息</h4>
+                  <table style={{ width: '100%', fontSize: 13 }}>
+                    <tbody>
+                      <tr><td style={{ padding: '4px 8px 4px 0', color: '#64748b', width: 90 }}>姓名</td><td>{viewDetail.name}</td></tr>
+                      <tr><td style={{ padding: '4px 8px 4px 0', color: '#64748b' }}>部门</td><td>{viewDetail.department_id ? (departments.find((d) => d.department_id === viewDetail.department_id)?.name ?? viewDetail.department_id) : '-'}</td></tr>
+                      <tr><td style={{ padding: '4px 8px 4px 0', color: '#64748b' }}>上级</td><td>{viewDetail.manager_id ? (employees.find((e) => e.employee_id === viewDetail.manager_id)?.name ?? viewDetail.manager_id) : '-'}</td></tr>
+                      <tr><td style={{ padding: '4px 8px 4px 0', color: '#64748b' }}>类型</td><td>{viewDetail.is_ai_agent ? 'AI Agent' : '人类'}</td></tr>
+                      <tr><td style={{ padding: '4px 8px 4px 0', color: '#64748b' }}>状态</td><td>{viewDetail.status === 'disabled' ? '已禁用' : '正常'}</td></tr>
+                      <tr><td style={{ padding: '4px 8px 4px 0', color: '#64748b' }}>创建时间</td><td>{viewDetail.created_at}</td></tr>
+                      <tr><td style={{ padding: '4px 8px 4px 0', color: '#64748b' }}>更新时间</td><td>{viewDetail.updated_at}</td></tr>
+                      {viewDetail.agent_profile != null && (
+                        <tr><td style={{ padding: '4px 8px 4px 0', color: '#64748b', verticalAlign: 'top' }}>Agent 配置</td><td><pre style={{ margin: 0, fontSize: 12, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{JSON.stringify(viewDetail.agent_profile, null, 2)}</pre></td></tr>
+                      )}
+                      {viewDetail.skills_badge != null && (
+                        <tr><td style={{ padding: '4px 8px 4px 0', color: '#64748b', verticalAlign: 'top' }}>技能标签</td><td><pre style={{ margin: 0, fontSize: 12, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{JSON.stringify(viewDetail.skills_badge, null, 2)}</pre></td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                <div>
+                  <h4 style={{ margin: '0 0 8px', fontSize: 13, color: '#475569', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    连接信息（后端统一配置，所有员工一致）
+                    {viewDetail.mqtt_connection && (
+                      <button type="button" className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: 12 }} onClick={copyConnectionInfo}>
+                        {connectionCopied ? '已复制' : '一键复制连接信息'}
+                      </button>
+                    )}
+                  </h4>
+                  {viewDetail.mqtt_connection ? (
+                    <table style={{ width: '100%', fontSize: 13 }}>
+                      <tbody>
+                        <tr><td style={{ padding: '4px 8px 4px 0', color: '#64748b', width: 130 }}>Broker 地址</td><td><code>{viewDetail.mqtt_connection.broker_host}</code></td></tr>
+                        <tr><td style={{ padding: '4px 8px 4px 0', color: '#64748b' }}>端口</td><td>{viewDetail.mqtt_connection.broker_port}</td></tr>
+                        <tr><td style={{ padding: '4px 8px 4px 0', color: '#64748b' }}>TLS</td><td>{viewDetail.mqtt_connection.use_tls ? '是' : '否'}</td></tr>
+                        <tr><td style={{ padding: '4px 8px 4px 0', color: '#64748b' }}>MQTT 用户名</td><td><code>{viewDetail.mqtt_connection.mqtt_username ?? '-'}</code></td></tr>
+                        <tr><td style={{ padding: '4px 8px 4px 0', color: '#64748b' }}>MQTT 密码</td><td><code>{viewDetail.mqtt_connection.mqtt_password ?? '-'}</code></td></tr>
+                        <tr><td style={{ padding: '4px 8px 4px 0', color: '#64748b' }}>auth.bind 员工 ID</td><td><code>{viewDetail.mqtt_connection.auth_bind_employee_id ?? viewDetail.employee_id}</code></td></tr>
+                        <tr><td style={{ padding: '4px 8px 4px 0', color: '#64748b', verticalAlign: 'top' }}>Client ID 规则</td><td><code style={{ fontSize: 12 }}>{viewDetail.mqtt_connection.client_id_scheme ?? '-'}</code></td></tr>
+                      </tbody>
+                    </table>
+                  ) : (
+                    <p style={{ margin: 0, color: '#64748b', fontSize: 13 }}>暂无连接信息</p>
+                  )}
+                </div>
+              </div>
+              <div style={{ marginTop: 12 }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setViewDetail(null)}>关闭</button>
+              </div>
+            </div>
           )}
           {editingId && (
             <form onSubmit={handleUpdate} style={{ marginBottom: 20, padding: 16, background: '#f0fdf4', borderRadius: 8 }}>
@@ -261,6 +390,7 @@ export default function Employees() {
                   <td>{e.is_ai_agent ? 'AI Agent' : '人类'}</td>
                   {includeDisabled && <td>{e.status === 'disabled' ? '已禁用' : '正常'}</td>}
                   <td>
+                    <button type="button" className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: 12, marginRight: 6 }} onClick={() => openView(e.employee_id)}>查看信息</button>
                     <button type="button" className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: 12, marginRight: 6 }} onClick={() => openEdit(e.employee_id)}>编辑</button>
                     <button type="button" className="btn btn-danger" style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => handleDelete(e.employee_id)}>删除</button>
                   </td>

@@ -23,6 +23,7 @@ export async function handleEmployeeGet(ctx: ReqContext, deps: Deps): Promise<Re
   if (list.length === 0) return { code: Code.NOT_FOUND, message: 'Employee not found' };
 
   const r = list[0];
+  const mqtt_connection = buildMqttConnection(deps.config, r.employee_id);
   return {
     code: Code.OK,
     message: 'ok',
@@ -37,6 +38,7 @@ export async function handleEmployeeGet(ctx: ReqContext, deps: Deps): Promise<Re
       status: r.status,
       created_at: r.created_at instanceof Date ? r.created_at.toISOString() : r.created_at,
       updated_at: r.updated_at instanceof Date ? r.updated_at.toISOString() : r.updated_at,
+      mqtt_connection,
     },
   };
 }
@@ -107,7 +109,7 @@ export async function handleEmployeeCreate(ctx: ReqContext, deps: Deps): Promise
   );
 
   const created_at = new Date();
-  const mqtt_connection = buildMqttConnection(deps.config, employee_id, mqtt_password);
+  const mqtt_connection = buildMqttConnection(deps.config, employee_id);
 
   return {
     code: Code.OK,
@@ -166,14 +168,16 @@ export async function handleEmployeeDelete(ctx: ReqContext, deps: Deps): Promise
   };
 }
 
-function buildMqttConnection(config: AppConfig, employeeId: string, mqttPassword: string): Record<string, unknown> {
+/** 连接信息使用后端统一配置的 Broker 用户名/密码，员工 ID 仅用于 auth.bind 与 client_id 规则 */
+function buildMqttConnection(config: AppConfig, employeeId: string): Record<string, unknown> {
   const broker = config.broker;
   return {
     broker_host: broker.host,
     broker_port: broker.port,
     use_tls: broker.useTls,
-    mqtt_username: employeeId,
-    mqtt_password: mqttPassword,
+    mqtt_username: broker.username ?? '',
+    mqtt_password: broker.password ?? '',
+    auth_bind_employee_id: employeeId,
     client_id_scheme: `${employeeId}_{device_id}_{uuid}`,
   };
 }
