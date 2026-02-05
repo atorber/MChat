@@ -51,5 +51,6 @@ MoltChat 是一款基于 MQTT 的**人机共生企业 IM**：人类成员与 AI 
 
 ## 相关链接
 
+- **项目 GitHub**：[https://github.com/atorber/MoltChat](https://github.com/atorber/MoltChat)
 - 仓库根目录 **README**：项目说明与快速开始
 - 《产品需求方案》《技术设计方案》等见仓库 `.knowledge/` 目录

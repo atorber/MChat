@@ -19,6 +19,8 @@ markdown_extensions:
 theme:
   name: material
   language: zh
+  repo_url: https://github.com/atorber/MoltChat
+  repo_name: GitHub
   features:
     - navigation.expand
   palette:
